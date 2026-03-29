@@ -17,6 +17,8 @@ struct PostSummary {
     category: String,
     date: String,
     excerpt: String,
+    #[serde(default)]
+    search_text: String,
     author: String,
     read_time: String,
     path: String,
@@ -162,6 +164,9 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
             .collect::<Vec<_>>()
     });
 
+    let can_go_previous = Memo::new(move |_| state.current_page.get() > 1);
+    let can_go_next = Memo::new(move |_| state.current_page.get() < total_pages.get());
+
     view! {
         <main class="home-shell">
             <header class="home-header">
@@ -245,12 +250,12 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
                     <button
                         class="page-btn"
                         on:click=move |_| {
-                            let current = state.current_page.get();
-                            if current > 1 {
+                            if can_go_previous.get() {
+                                let current = state.current_page.get();
                                 state.current_page.set(current - 1);
                             }
                         }
-                        disabled=move || state.current_page.get() <= 1
+                        disabled=move || !can_go_previous.get()
                     >
                         "Previous"
                     </button>
@@ -260,13 +265,12 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
                     <button
                         class="page-btn"
                         on:click=move |_| {
-                            let current = state.current_page.get();
-                            let max_page = total_pages.get();
-                            if current < max_page {
+                            if can_go_next.get() {
+                                let current = state.current_page.get();
                                 state.current_page.set(current + 1);
                             }
                         }
-                        disabled=move || state.current_page.get() >= total_pages.get()
+                        disabled=move || !can_go_next.get()
                     >
                         "Next"
                     </button>
@@ -393,11 +397,19 @@ fn PostPage() -> impl IntoView {
 }
 
 fn post_matches_query(post: &PostSummary, query: &str) -> bool {
-    let tags = post.tags.join(" ").to_ascii_lowercase();
-    post.title.to_ascii_lowercase().contains(query)
-        || post.excerpt.to_ascii_lowercase().contains(query)
-        || post.category.to_ascii_lowercase().contains(query)
-        || tags.contains(query)
+    let search_text = if post.search_text.is_empty() {
+        format!(
+            "{} {} {} {}",
+            post.title,
+            post.excerpt,
+            post.category,
+            post.tags.join(" ")
+        )
+    } else {
+        post.search_text.clone()
+    };
+
+    search_text.to_ascii_lowercase().contains(query)
 }
 
 async fn load_index() -> Option<Vec<PostSummary>> {

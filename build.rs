@@ -10,6 +10,7 @@ struct PostSummary {
     category: String,
     date: String,
     excerpt: String,
+    search_text: String,
     author: String,
     read_time: String,
     path: String,
@@ -78,6 +79,7 @@ fn main() {
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();
+        let search_text = build_search_text(&title, &excerpt, &category, &tags, body);
 
         posts.push(PostSummary {
             title,
@@ -88,6 +90,7 @@ fn main() {
                 .cloned()
                 .unwrap_or_else(|| "1970-01-01".to_string()),
             excerpt,
+            search_text,
             author: meta
                 .get("author")
                 .cloned()
@@ -177,4 +180,36 @@ fn make_excerpt(content: &str, max_len: usize) -> String {
     } else {
         format!("{}...", &trimmed[..max_len])
     }
+}
+
+fn build_search_text(
+    title: &str,
+    excerpt: &str,
+    category: &str,
+    tags: &[String],
+    body: &str,
+) -> String {
+    let normalized_body = normalize_search_text(body);
+    format!(
+        "{}\n{}\n{}\n{}\n{}",
+        title,
+        excerpt,
+        category,
+        tags.join(" "),
+        normalized_body
+    )
+}
+
+fn normalize_search_text(content: &str) -> String {
+    content
+        .chars()
+        .map(|ch| match ch {
+            '\n' | '\r' | '\t' => ' ',
+            '<' | '>' | '/' | '"' | '\'' | '`' | '*' | '_' | '#' | '[' | ']' | '(' | ')' => ' ',
+            _ => ch,
+        })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
 }
