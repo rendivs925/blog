@@ -166,9 +166,9 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
         <main class="home-shell">
             <header class="home-header">
                 <div class="mono eyebrow">"Rendi's Knowledge Archive"</div>
-                <h1 class="home-title">"Scalable Markdown Blog"</h1>
+                <h1 class="home-title">"Engineering Notes and Research"</h1>
                 <p class="home-sub">
-                    "Built with Leptos CSR. Add markdown files in public/content and publish."
+                    "In-depth articles on software engineering, systems thinking, and applied physics, written for practitioners and curious builders."
                 </p>
             </header>
 
@@ -197,7 +197,7 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
                 <input
                     class="search-input"
                     type="search"
-                    placeholder="Search title, excerpt, tags..."
+                    placeholder="Search by title, abstract, category, or tag"
                     prop:value=move || state.search_query.get()
                     on:input=move |ev| {
                         state.search_query.set(event_target_value(&ev));
@@ -210,7 +210,7 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
 
             <Show
                 when=move || !state.loading.get()
-                fallback=|| view! { <p class="loading">"Loading posts index..."</p> }
+                fallback=|| view! { <p class="loading">"Loading article index..."</p> }
             >
                 <section class="post-grid">
                     {move || {
@@ -238,7 +238,7 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
                 </section>
 
                 <Show when=move || filtered_posts.get().is_empty()>
-                    <p class="loading">"No posts found for this filter."</p>
+                    <p class="loading">"No articles match your current filters."</p>
                 </Show>
 
                 <section class="pagination-row">
@@ -357,12 +357,12 @@ fn PostPage() -> impl IntoView {
             <div id="progress" class="progress-bar"></div>
             <a href="#" id="backToTop" class="back-to-top" title="Back to Top">"↑"</a>
             <A href="/" attr:class="back-btn-link">
-                <button class="back-btn">"<- Back to all posts"</button>
+                <button class="back-btn">"<- Back to all articles"</button>
             </A>
 
             <Show
                 when=move || !is_loading_post.get()
-                fallback=|| view! { <p class="loading">"Loading post..."</p> }
+                fallback=|| view! { <p class="loading">"Loading article..."</p> }
             >
                 <Show
                     when=move || error.get().is_none()
@@ -372,9 +372,9 @@ fn PostPage() -> impl IntoView {
                         current_post.get().map(|post| {
                             view! {
                                 <header class="hero">
-                                    <div class="mono eyebrow">"Research Paper Access: Level Alpha"</div>
+                                    <div class="mono eyebrow">"Technical Publication"</div>
                                     <h1 class="hero-title">{post.title.clone()}</h1>
-                                    <p class="hero-sub">"Markdown-powered long-form content"</p>
+                                    <p class="hero-sub">"Long-form writing on software engineering, systems, and physics"</p>
                                     <div class="hero-meta mono">
                                         <span>{format!("CATEGORY: {}", post.category)}</span>
                                         <span>{format!("DATE: {}", post.date)}</span>
