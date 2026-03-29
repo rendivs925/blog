@@ -9,6 +9,7 @@ use serde::Deserialize;
 use std::collections::{BTreeSet, HashMap};
 
 const PAGE_SIZE: usize = 12;
+const CONTENT_ROOT: &str = "/public";
 
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 struct PostSummary {
@@ -413,12 +414,18 @@ fn post_matches_query(post: &PostSummary, query: &str) -> bool {
 }
 
 async fn load_index() -> Option<Vec<PostSummary>> {
-    let response = Request::get("/content-index.json").send().await.ok()?;
+    let response = Request::get(&format!("{CONTENT_ROOT}/content-index.json"))
+        .send()
+        .await
+        .ok()?;
     response.json::<Vec<PostSummary>>().await.ok()
 }
 
 async fn load_post(path: &str) -> Option<RenderedPost> {
-    let response = Request::get(&format!("/{path}")).send().await.ok()?;
+    let response = Request::get(&format!("{CONTENT_ROOT}/{path}"))
+        .send()
+        .await
+        .ok()?;
     let text = response.text().await.ok()?;
     let (meta, body) = parse_frontmatter(&text);
     let html = markdown_to_html(body);
