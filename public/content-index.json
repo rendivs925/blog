@@ -1,0 +1,48 @@
+[
+  {
+    "title": "UNIFIED METRIC RESONANCE THEORY",
+    "slug": "unified_metric_resonance_theory",
+    "category": "physics",
+    "date": "2026-03-29",
+    "excerpt": "Post-relativistic engineering, warp drive physics, and quantum vacuum propulsion framework.",
+    "author": "Rendi Virgantara Setiawan with AI",
+    "read_time": "~40 MINUTES",
+    "path": "content/physics/unified_metric_resonance_theory.md",
+    "tags": [
+      "physics",
+      "warp-drive",
+      "quantum-vacuum",
+      "research"
+    ]
+  },
+  {
+    "title": "Leptos CSR Blog Setup",
+    "slug": "leptos_csr_blog_setup",
+    "category": "rust",
+    "date": "2026-03-29",
+    "excerpt": "How to build a markdown-powered blog frontend with Leptos CSR and static content assets.",
+    "author": "Rendi Virgantara Setiawan",
+    "read_time": "~8 MINUTES",
+    "path": "content/rust/leptos_csr_blog_setup.md",
+    "tags": [
+      "rust",
+      "leptos",
+      "frontend"
+    ]
+  },
+  {
+    "title": "Editorial Policy",
+    "slug": "editorial_policy",
+    "category": "general",
+    "date": "2026-03-29",
+    "excerpt": "How articles are structured, tagged, and published in this markdown workflow.",
+    "author": "Rendi Virgantara Setiawan",
+    "read_time": "~4 MINUTES",
+    "path": "content/general/editorial_policy.md",
+    "tags": [
+      "writing",
+      "workflow",
+      "blogging"
+    ]
+  }
+]
