@@ -34,7 +34,7 @@ jobs:
         run: cargo install trunk --locked
 
       - name: Build site
-        run: trunk build --release
+        run: trunk build --release --public-url /blog/
 
       - name: Add SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html

@@ -9,6 +9,11 @@ use serde::Deserialize;
 use std::collections::{BTreeSet, HashMap};
 
 const PAGE_SIZE: usize = 12;
+
+#[cfg(debug_assertions)]
+const ROUTER_BASE: &str = "";
+
+#[cfg(not(debug_assertions))]
 const ROUTER_BASE: &str = "/blog";
 
 #[derive(Clone, Debug, Deserialize, PartialEq)]
@@ -67,7 +72,7 @@ pub fn App() -> impl IntoView {
     });
 
     view! {
-        <Router base="/blog">
+        <Router base=ROUTER_BASE>
             <div class="app-shell">
                 <div class="ambient ambient-left"></div>
                 <div class="ambient ambient-right"></div>
@@ -456,6 +461,10 @@ async fn load_post(path: &str) -> Option<RenderedPost> {
 }
 
 fn content_root() -> String {
+    if ROUTER_BASE.is_empty() {
+        return "/public".to_string();
+    }
+
     let pathname = window()
         .location()
         .pathname()
