@@ -327,7 +327,6 @@ fn PostPage() -> impl IntoView {
             current_post.set(Some(cached));
             is_loading_post.set(false);
             setup_post_interactions();
-            queue_mathjax_typeset();
             return;
         }
 
@@ -366,7 +365,6 @@ fn PostPage() -> impl IntoView {
                     is_loading_post.set(false);
                     let _ = window().scroll_to_with_x_and_y(0.0, 0.0);
                     setup_post_interactions();
-                    queue_mathjax_typeset();
                 });
             }
             None => {
@@ -536,122 +534,7 @@ fn markdown_to_html(markdown: &str) -> String {
 }
 
 fn process_math(markdown: &str) -> String {
-    let mut result = String::with_capacity(markdown.len());
-    let mut chars = markdown.chars().peekable();
-    let mut in_code_block = false;
-    let mut inline_code_delim = 0usize;
-
-    while let Some(c) = chars.next() {
-        if c == '`' {
-            let mut backtick_count = 1;
-            while chars.peek() == Some(&'`') {
-                chars.next();
-                backtick_count += 1;
-            }
-            if backtick_count == 3 {
-                in_code_block = !in_code_block;
-            } else if !in_code_block {
-                if inline_code_delim == 0 {
-                    inline_code_delim = backtick_count;
-                } else if inline_code_delim == backtick_count {
-                    inline_code_delim = 0;
-                }
-            }
-            result.push_str(&"`".repeat(backtick_count));
-            continue;
-        }
-
-        if in_code_block || inline_code_delim > 0 {
-            result.push(c);
-            continue;
-        }
-
-        if c == '$' {
-            if chars.peek() == Some(&'$') {
-                chars.next();
-                let (math, _) = extract_math(&mut chars, "$$");
-                result.push_str("\n<div class=\"math math-display\">\\[");
-                result.push_str(&math);
-                result.push_str("\\]</div>\n");
-            } else {
-                let (math, _) = extract_math(&mut chars, "$");
-                result.push_str("<span class=\"math math-inline\">\\(");
-                result.push_str(&math);
-                result.push_str("\\)</span>");
-            }
-            continue;
-        }
-
-        result.push(c);
-    }
-
-    result
-}
-
-fn extract_math(chars: &mut std::iter::Peekable<std::str::Chars>, delimiter: &str) -> (String, bool) {
-    let mut math = String::new();
-    let mut escaped = false;
-
-    while let Some(&c) = chars.peek() {
-        if escaped {
-            math.push(c);
-            chars.next();
-            escaped = false;
-            continue;
-        }
-
-        match c {
-            '\\' => {
-                escaped = true;
-                math.push(c);
-                chars.next();
-            }
-            '$' => {
-                chars.next();
-                if chars.peek() == Some(&'$') && delimiter == "$$" {
-                    chars.next();
-                    break;
-                } else if delimiter == "$" {
-                    break;
-                } else {
-                    math.push('$');
-                }
-            }
-            _ => {
-                math.push(c);
-                chars.next();
-            }
-        }
-    }
-
-    (math.trim().to_string(), true)
-}
-fn window() -> web_sys::Window {
-    web_sys::window().expect("window unavailable")
-}
-
-fn queue_mathjax_typeset() {
-    let script = r#"
-window.__mathJaxPendingTypeset = true;
-
-function runMathJaxTypeset() {
-  if (!window.__mathJaxPendingTypeset) return;
-  if (!window.MathJax || !window.MathJax.typesetPromise) {
-    setTimeout(runMathJaxTypeset, 100);
-    return;
-  }
-
-  window.__mathJaxPendingTypeset = false;
-  MathJax.typesetClear();
-  MathJax.typesetPromise()
-    .catch(function(err) {
-      console.log('MathJax typeset error:', err);
-    });
-}
-
-runMathJaxTypeset();
-"#;
-    let _ = js_sys::eval(script);
+    markdown.to_string()
 }
 
 fn setup_post_interactions() {
