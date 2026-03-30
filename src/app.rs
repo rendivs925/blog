@@ -570,13 +570,11 @@ fn process_math(markdown: &str) -> String {
             if chars.peek() == Some(&'$') {
                 chars.next();
                 let (math, _) = extract_math(&mut chars, "$$");
-                let math = normalize_math_content(&math);
                 result.push_str("\n<div class=\"math math-display\">\\[");
                 result.push_str(&math);
                 result.push_str("\\]</div>\n");
             } else {
                 let (math, _) = extract_math(&mut chars, "$");
-                let math = normalize_math_content(&math);
                 result.push_str("<span class=\"math math-inline\">\\(");
                 result.push_str(&math);
                 result.push_str("\\)</span>");
@@ -628,11 +626,6 @@ fn extract_math(chars: &mut std::iter::Peekable<std::str::Chars>, delimiter: &st
 
     (math.trim().to_string(), true)
 }
-
-fn normalize_math_content(math: &str) -> String {
-    math.replace("\\_", "_").replace("\\\\", "\\")
-}
-
 fn window() -> web_sys::Window {
     web_sys::window().expect("window unavailable")
 }
