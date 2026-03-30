@@ -528,7 +528,6 @@ fn markdown_to_html(markdown: &str) -> String {
     options.insert(Options::ENABLE_STRIKETHROUGH);
     options.insert(Options::ENABLE_TASKLISTS);
     options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
-    options.insert(Options::ENABLE_CODE_BLOCKS);
 
     let parser = Parser::new_ext(&markdown, options);
     let mut output = String::new();
