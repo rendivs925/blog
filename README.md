@@ -115,6 +115,28 @@ trunk build --release
 
 Deploy the generated `dist/` directory.
 
+### GitHub Pages
+
+This repository is configured as a project site:
+
+- Repo: `rendivs925/blog`
+- URL: `https://rendivs925.github.io/blog/`
+
+`Trunk.toml` must use:
+
+```toml
+[build]
+dist = "dist"
+public_url = "/blog/"
+```
+
+Add GitHub Pages in repository settings:
+
+1. Go to `Settings > Pages`
+2. Set `Source` to `GitHub Actions`
+
+The included workflow will build and deploy the site on every push to `main`.
+
 ## Notes
 
 - `target/` and `dist/` are intentionally ignored.
