@@ -9,7 +9,7 @@ use serde::Deserialize;
 use std::collections::{BTreeSet, HashMap};
 
 const PAGE_SIZE: usize = 12;
-const CONTENT_ROOT: &str = "/public";
+const ROUTER_BASE: &str = "/blog";
 
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 struct PostSummary {
@@ -414,7 +414,7 @@ fn post_matches_query(post: &PostSummary, query: &str) -> bool {
 }
 
 async fn load_index() -> Option<Vec<PostSummary>> {
-    let response = Request::get(&format!("{CONTENT_ROOT}/content-index.json"))
+    let response = Request::get(&format!("{}/content-index.json", content_root()))
         .send()
         .await
         .ok()?;
@@ -422,7 +422,7 @@ async fn load_index() -> Option<Vec<PostSummary>> {
 }
 
 async fn load_post(path: &str) -> Option<RenderedPost> {
-    let response = Request::get(&format!("{CONTENT_ROOT}/{path}"))
+    let response = Request::get(&format!("{}/{}", content_root(), path))
         .send()
         .await
         .ok()?;
@@ -453,6 +453,19 @@ async fn load_post(path: &str) -> Option<RenderedPost> {
             .unwrap_or_else(|| "~5 MINUTES".to_string()),
         html,
     })
+}
+
+fn content_root() -> String {
+    let pathname = window()
+        .location()
+        .pathname()
+        .unwrap_or_else(|_| "/".to_string());
+
+    if pathname.starts_with(ROUTER_BASE) {
+        format!("{ROUTER_BASE}/public")
+    } else {
+        "/public".to_string()
+    }
 }
 
 fn parse_frontmatter(content: &str) -> (HashMap<String, String>, &str) {
