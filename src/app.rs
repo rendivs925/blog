@@ -485,6 +485,7 @@ fn parse_frontmatter(content: &str) -> (HashMap<String, String>, &str) {
 }
 
 fn markdown_to_html(markdown: &str) -> String {
+    let markdown = process_math(markdown);
     let mut options = Options::empty();
     options.insert(Options::ENABLE_TABLES);
     options.insert(Options::ENABLE_FOOTNOTES);
@@ -492,10 +493,108 @@ fn markdown_to_html(markdown: &str) -> String {
     options.insert(Options::ENABLE_TASKLISTS);
     options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
 
-    let parser = Parser::new_ext(markdown, options);
+    let parser = Parser::new_ext(&markdown, options);
     let mut output = String::new();
     html::push_html(&mut output, parser);
     output
+}
+
+fn process_math(markdown: &str) -> String {
+    let mut result = String::with_capacity(markdown.len());
+    let mut chars = markdown.chars().peekable();
+    let mut in_code_block = false;
+    let mut inline_code_delim = 0usize;
+
+    while let Some(c) = chars.next() {
+        if c == '`' {
+            let mut backtick_count = 1;
+            while chars.peek() == Some(&'`') {
+                chars.next();
+                backtick_count += 1;
+            }
+            if backtick_count == 3 {
+                in_code_block = !in_code_block;
+            } else if !in_code_block {
+                if inline_code_delim == 0 {
+                    inline_code_delim = backtick_count;
+                } else if inline_code_delim == backtick_count {
+                    inline_code_delim = 0;
+                }
+            }
+            result.push_str(&"`".repeat(backtick_count));
+            continue;
+        }
+
+        if in_code_block || inline_code_delim > 0 {
+            result.push(c);
+            continue;
+        }
+
+        if c == '$' {
+            if chars.peek() == Some(&'$') {
+                chars.next();
+                let (math, _) = extract_math(&mut chars, "$$");
+                let math = normalize_math_content(&math);
+                result.push_str("\n<div class=\"math math-display\">\\[");
+                result.push_str(&math);
+                result.push_str("\\]</div>\n");
+            } else {
+                let (math, _) = extract_math(&mut chars, "$");
+                let math = normalize_math_content(&math);
+                result.push_str("<span class=\"math math-inline\">\\(");
+                result.push_str(&math);
+                result.push_str("\\)</span>");
+            }
+            continue;
+        }
+
+        result.push(c);
+    }
+
+    result
+}
+
+fn extract_math(chars: &mut std::iter::Peekable<std::str::Chars>, delimiter: &str) -> (String, bool) {
+    let mut math = String::new();
+    let mut escaped = false;
+
+    while let Some(&c) = chars.peek() {
+        if escaped {
+            math.push(c);
+            chars.next();
+            escaped = false;
+            continue;
+        }
+
+        match c {
+            '\\' => {
+                escaped = true;
+                math.push(c);
+                chars.next();
+            }
+            '$' => {
+                chars.next();
+                if chars.peek() == Some(&'$') && delimiter == "$$" {
+                    chars.next();
+                    break;
+                } else if delimiter == "$" {
+                    break;
+                } else {
+                    math.push('$');
+                }
+            }
+            _ => {
+                math.push(c);
+                chars.next();
+            }
+        }
+    }
+
+    (math.trim().to_string(), true)
+}
+
+fn normalize_math_content(math: &str) -> String {
+    math.replace("\\_", "_").replace("\\\\", "\\")
 }
 
 fn window() -> web_sys::Window {
@@ -503,7 +602,26 @@ fn window() -> web_sys::Window {
 }
 
 fn queue_mathjax_typeset() {
-    let script = "if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise(); }";
+    let script = r#"
+window.__mathJaxPendingTypeset = true;
+
+function runMathJaxTypeset() {
+  if (!window.__mathJaxPendingTypeset) return;
+  if (!window.MathJax || !window.MathJax.typesetPromise) {
+    setTimeout(runMathJaxTypeset, 100);
+    return;
+  }
+
+  window.__mathJaxPendingTypeset = false;
+  MathJax.typesetClear();
+  MathJax.typesetPromise()
+    .catch(function(err) {
+      console.log('MathJax typeset error:', err);
+    });
+}
+
+runMathJaxTypeset();
+"#;
     let _ = js_sys::eval(script);
 }
 

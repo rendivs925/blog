@@ -427,6 +427,16 @@ body {
   border-radius: 6px;
 }
 
+.markdown-body .math-inline {
+  white-space: normal;
+}
+
+.markdown-body .math-display {
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .loading {
   color: #94a3b8;
 }
