@@ -67,7 +67,7 @@ pub fn App() -> impl IntoView {
     });
 
     view! {
-        <Router>
+        <Router base="/blog">
             <div class="app-shell">
                 <div class="ambient ambient-left"></div>
                 <div class="ambient ambient-right"></div>
