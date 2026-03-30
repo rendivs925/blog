@@ -16,6 +16,20 @@ const ROUTER_BASE: &str = "";
 #[cfg(not(debug_assertions))]
 const ROUTER_BASE: &str = "/blog";
 
+fn app_href(path: &str) -> String {
+    let normalized = if path.starts_with('/') {
+        path.to_string()
+    } else {
+        format!("/{path}")
+    };
+
+    if ROUTER_BASE.is_empty() {
+        normalized
+    } else {
+        format!("{ROUTER_BASE}{normalized}")
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 struct PostSummary {
     title: String,
@@ -184,7 +198,7 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
             </header>
 
             <section class="category-bar">
-                <A href="/" attr:class=move || if active_category.get() == "all" { "category-btn active" } else { "category-btn" }>
+                <A href=app_href("/") attr:class=move || if active_category.get() == "all" { "category-btn active" } else { "category-btn" }>
                     "All"
                 </A>
                 {move || {
@@ -192,7 +206,7 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
                         .get()
                         .into_iter()
                         .map(|category| {
-                            let href = format!("/category/{category}");
+                            let href = app_href(&format!("/category/{category}"));
                             let category_for_class = category.clone();
                             view! {
                                 <A href=href attr:class=move || if active_category.get() == category_for_class { "category-btn active" } else { "category-btn" }>
@@ -229,7 +243,7 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
                             .get()
                             .into_iter()
                             .map(|post| {
-                                let href = format!("/post/{}", post.slug);
+                                let href = app_href(&format!("/post/{}", post.slug));
                                 view! {
                                     <A href=href attr:class="post-card-link">
                                         <article class="post-card">
@@ -366,7 +380,7 @@ fn PostPage() -> impl IntoView {
         <article class="post-shell">
             <div id="progress" class="progress-bar"></div>
             <a href="#" id="backToTop" class="back-to-top" title="Back to Top">"↑"</a>
-            <A href="/" attr:class="back-btn-link">
+            <A href=app_href("/") attr:class="back-btn-link">
                 <button class="back-btn">"<- Back to all articles"</button>
             </A>
 
