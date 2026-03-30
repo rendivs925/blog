@@ -545,7 +545,20 @@ setTimeout(() => {
   if (!progress || !backToTop) return;
 
   if (window.hljs) {
-    window.hljs.highlightAll();
+    document.querySelectorAll('pre code').forEach((el) => {
+      window.hljs.highlightElement(el);
+    });
+  }
+
+  if (window.renderMathInElement) {
+    window.renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+        {left: '\\[', right: '\\]', display: true},
+        {left: '\\(', right: '\\)', display: false}
+      ]
+    });
   }
 
   const onScroll = () => {
