@@ -191,9 +191,9 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
         <main class="home-shell">
             <header class="home-header">
                 <div class="mono eyebrow">"Rendi's Knowledge Archive"</div>
-                <h1 class="home-title">"Engineering Notes and Research"</h1>
+                <h1 class="home-title">"Engineering, Research, and Islamic Reflections"</h1>
                 <p class="home-sub">
-                    "In-depth articles on software engineering, systems thinking, and applied physics, written for practitioners and curious builders."
+                    "In-depth writing on software engineering, systems thinking, applied physics, and religion including Islamic content."
                 </p>
             </header>
 

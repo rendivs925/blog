@@ -1,6 +1,6 @@
 # Engineering Notes (Leptos CSR)
 
-A professional, frontend-only publishing site built with Leptos CSR.
+A professional, frontend-only publishing site built with Leptos CSR for technical and religious writing, including Islamic content.
 
 The project is designed for long-term maintainability:
 - Content is authored in Markdown.
@@ -85,7 +85,7 @@ title: "Understanding Ownership in Rust"
 slug: "understanding_ownership_in_rust"
 category: "rust"
 date: "2026-03-29"
-author: "Rendi Setiawan"
+author: "Rendi Virgantara Setiawan"
 readTime: "~8 MINUTES"
 excerpt: "A practical explanation of ownership, borrowing, and lifetimes in Rust."
 tags: ["rust", "ownership", "memory"]
