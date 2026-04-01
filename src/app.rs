@@ -50,6 +50,7 @@ struct PostSummary {
 struct RenderedPost {
     title: String,
     category: String,
+    excerpt: String,
     date: String,
     author: String,
     read_time: String,
@@ -340,6 +341,7 @@ fn PostPage() -> impl IntoView {
                 let cache_key = post.slug;
                 let fallback_title = post.title;
                 let fallback_category = post.category;
+                let fallback_excerpt = post.excerpt;
                 let fallback_date = post.date;
                 let fallback_author = post.author;
                 let fallback_read_time = post.read_time;
@@ -350,6 +352,7 @@ fn PostPage() -> impl IntoView {
                         .unwrap_or_else(|| RenderedPost {
                             title: fallback_title,
                             category: fallback_category,
+                            excerpt: fallback_excerpt,
                             date: fallback_date,
                             author: fallback_author,
                             read_time: fallback_read_time,
@@ -394,9 +397,9 @@ fn PostPage() -> impl IntoView {
                         current_post.get().map(|post| {
                             view! {
                                 <header class="hero">
-                                    <div class="mono eyebrow">"Technical Publication"</div>
+                                    <div class="mono eyebrow">{format!("{} ARTICLE", post.category.to_uppercase())}</div>
                                     <h1 class="hero-title">{post.title.clone()}</h1>
-                                    <p class="hero-sub">"Long-form writing on software engineering, systems, and physics"</p>
+                                    <p class="hero-sub">{post.excerpt.clone()}</p>
                                     <div class="hero-meta mono">
                                         <span>{format!("CATEGORY: {}", post.category)}</span>
                                         <span>{format!("DATE: {}", post.date)}</span>
@@ -456,6 +459,10 @@ async fn load_post(path: &str) -> Option<RenderedPost> {
             .get("category")
             .cloned()
             .unwrap_or_else(|| "general".to_string()),
+        excerpt: meta
+            .get("excerpt")
+            .cloned()
+            .unwrap_or_default(),
         date: meta
             .get("date")
             .cloned()
