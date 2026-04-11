@@ -4,7 +4,7 @@ slug: "architectures_of_scarcity_free_energy_gatekeepers"
 category: "physics"
 date: "2026-03-30"
 author: "Rendi Virgantara Setiawan"
-readTime: "65 MINUTES"
+readTime: "~14 MINUTES"
 excerpt: "A rigorous and undeniable deconstruction of the systemic legal and theoretical frameworks that enforce artificial scarcity while exploring the resonant logic of the post scarcity era through the lens of celestial motion and quantum baseline energy."
 tags: ["free energy", "thermodynamics", "post scarcity", "vibration", "resonance", "invention secrecy act", "fermi paradox"]
 ---
