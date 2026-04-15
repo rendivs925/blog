@@ -191,10 +191,10 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
     view! {
         <main class="home-shell">
             <header class="home-header">
-                <div class="mono eyebrow">"Rendi's Knowledge Archive"</div>
-                <h1 class="home-title">"Engineering, Research, and Islamic Reflections"</h1>
+                <div class="mono eyebrow">"The Frontier Lab"</div>
+                <h1 class="home-title">"Deep Research, Tech & Physics"</h1>
                 <p class="home-sub">
-                    "In-depth writing on software engineering, systems thinking, applied physics, and religion including Islamic content."
+                    "Exploring deep tech, frontier physics, UFO/UAP research, speculative science, and the edges of human knowledge."
                 </p>
             </header>
 
