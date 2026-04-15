@@ -191,8 +191,9 @@ fn ListingPage(active_category: Signal<String>) -> impl IntoView {
     view! {
         <main class="home-shell">
             <header class="home-header">
-                <div class="mono eyebrow">"The Frontier Lab"</div>
+                <div class="mono eyebrow">"// THE FRONTIER LAB"</div>
                 <h1 class="home-title">"Deep Research, Tech & Physics"</h1>
+                <p class="home-tagline">"Today's science fiction is simply tomorrow's engineering."</p>
                 <p class="home-sub">
                     "Exploring deep tech, frontier physics, UFO/UAP research, speculative science, and the edges of human knowledge."
                 </p>
