@@ -25,9 +25,17 @@ body {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Amiri", "Noto Naskh Arabic", sans-serif;
   line-height: 1.8;
   letter-spacing: 0.01em;
+}
+
+/* Ensure Arabic script uses a font with Quranic Uthmani support */
+@font-face {
+  font-family: 'ArabicFallback';
+  src: local('Amiri'), local('Noto Naskh Arabic'), local('Scheherazade New'), local('Traditional Arabic');
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  size-adjust: 95%;
 }
 
 .mono {
