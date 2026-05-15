@@ -1,15 +1,15 @@
 ---
-title: "The Truth About Islam — And Why Anti-Islamic Propaganda Is a Lie"
+title: "The Truth About Islam and Why Anti-Islamic Propaganda Is a Lie"
 slug: "the_truth_about_islam_and_why_anti_islamic_propaganda_is_a_lie"
 category: "spirituality"
 date: "2026-05-15"
 author: "Rendi Virgantara Setiawan"
 readTime: "~45 MINUTES"
-excerpt: "Complete history of Islam in Indonesia from the first traders to the Wali Songo (Nine Saints), their genius dakwah methods, and why their peaceful approach created the world's largest Muslim population — plus why Islam is the only system that threatens industries built on exploitation."
+excerpt: "Complete history of Islam in Indonesia from the first traders to the Wali Songo (Nine Saints), their genius dakwah methods, and why their peaceful approach created the world's largest Muslim population, plus why Islam is the only system that threatens industries built on exploitation."
 tags: ["islam", "spirituality", "wali_songo", "islamophobia", "indonesia", "history", "dakwah", "pesantren"]
 ---
 
-# The Truth About Islam — And Why Anti-Islamic Propaganda Is a Lie
+# The Truth About Islam and Why Anti-Islamic Propaganda Is a Lie
 
 ## Introduction
 
@@ -160,7 +160,7 @@ From this simple school, Sunan Ampel trained many of the other Wali Songo. He wa
 
 **Moh Limo (The Five "No"s):**
 
-Sunan Ampel's most famous teaching is "Moh Limo," a Javanese phrase meaning "refuse the five":
+Sunan Ampel's most famous teaching is "Moh Limo", a Javanese phrase meaning "refuse the five":
 
 1. Moh main (refuse gambling)
 2. Moh ngombe (refuse drinking alcohol)
@@ -197,7 +197,7 @@ Do not try to change everything at once. Start with the most obvious problems, t
 
 Sunan Bonang was the son of Sunan Ampel. He was brilliant, creative, and deeply sensitive to Javanese culture. He understood a profound truth: people will not listen to a message they do not enjoy.
 
-Java had a rich tradition of gamelan music. The people loved the sounds of bonang (a set of bronze gongs), kendang (drums), and saron (metallophones). Sunan Bonang did not ban this music as "un-Islamic." He used it. He composed new gamelan pieces with lyrics that contained Islamic teachings: the Oneness of God, the love of the Prophet, the importance of prayer, the reality of death, and the hope of paradise.
+Java had a rich tradition of gamelan music. The people loved the sounds of bonang (a set of bronze gongs), kendang (drums), and saron (metallophones). Sunan Bonang did not ban this music as "un-Islamic". He used it. He composed new gamelan pieces with lyrics that contained Islamic teachings: the Oneness of God, the love of the Prophet, the importance of prayer, the reality of death, and the hope of paradise.
 
 **Tombo Ati (The Most Famous Song):**
 
@@ -227,7 +227,7 @@ Translation:
 
 **Key Contribution:**
 
-He transformed Javanese gamelan from a Hindu-Buddhist ritual instrument into an Islamic educational tool. He also created the "Boneka" (puppet) tradition that combined Javanese storytelling with Islamic morals. The famous gamelan set "Sekaten," still played at the Yogyakarta palace during Maulid celebrations, originated from his innovation.
+He transformed Javanese gamelan from a Hindu-Buddhist ritual instrument into an Islamic educational tool. He also created the "Boneka" (puppet) tradition that combined Javanese storytelling with Islamic morals. The famous gamelan set "Sekaten", still played at the Yogyakarta palace during Maulid celebrations, originated from his innovation.
 
 **Lesson for Us:**
 
@@ -260,7 +260,7 @@ Like his brother, Sunan Drajat also used music. He created an instrument called 
 
 **Key Contribution:**
 
-His "Pamong" teachings emphasized that Islamic leaders must serve the community rather than rule over them. The word "pamong" literally means "one who serves," a concept that deeply influenced Javanese Islamic leadership.
+His "Pamong" teachings emphasized that Islamic leaders must serve the community rather than rule over them. The word "pamong" literally means "one who serves", a concept that deeply influenced Javanese Islamic leadership.
 
 **Lesson for Us:**
 
@@ -288,7 +288,7 @@ He built the Masjid Menara Kudus (Kudus Mosque) with a tower that resembles a Hi
 
 **The Bubur Suro Tradition:**
 
-He created a tradition called "Bubur Suro," making porridge during the Islamic month of Muharram and distributing it to the community. This tradition blended Javanese, Hindu, and Islamic elements and brought everyone together.
+He created a tradition called "Bubur Suro", making porridge during the Islamic month of Muharram and distributing it to the community. This tradition blended Javanese, Hindu, and Islamic elements and brought everyone together.
 
 **His Dakwah Method:**
 
@@ -356,7 +356,7 @@ He was born Raden Said, the son of a high-ranking Majapahit official. He grew up
 
 One day, he tried to rob an old man traveling alone. The old man was Sunan Bonang. Instead of fighting, Sunan Bonang simply looked at him with compassion and said: "If you want wealth, I will give you more than you can imagine. But come with me first."
 
-Raden Said was transformed. He became a devoted student of Sunan Bonang, who sent him to study under Sunan Ampel. His transformation was so complete that he became known as "Kalijaga," meaning "keeper of the river," because he once stood guard at a river for years as an act of penance and service.
+Raden Said was transformed. He became a devoted student of Sunan Bonang, who sent him to study under Sunan Ampel. His transformation was so complete that he became known as "Kalijaga", meaning "keeper of the river", because he once stood guard at a river for years as an act of penance and service.
 
 **Wayang Kulit (The Masterpiece):**
 
@@ -364,7 +364,7 @@ Sunan Kalijaga observed that Javanese people loved wayang kulit (shadow puppetry
 
 He changed the shape of the puppets, making them simpler and more abstract so that they did not resemble living beings, thus avoiding the Islamic prohibition on depicting living creatures. He rewrote the stories, keeping the familiar Javanese characters but infusing them with Islamic moral lessons.
 
-The most famous story cycle he created was "Dewaruci," the story of Bima's spiritual journey to find the water of life, which is actually an allegory for the Sufi concept of ma'rifah (gnosis, direct knowledge of God).
+The most famous story cycle he created was "Dewaruci", the story of Bima's spiritual journey to find the water of life, which is actually an allegory for the Sufi concept of ma'rifah (gnosis, direct knowledge of God).
 
 **Traditions He Created:**
 
@@ -374,7 +374,7 @@ The most famous story cycle he created was "Dewaruci," the story of Bima's spiri
 
 **Lir-Ilir (The Song of Awakening):**
 
-He composed "Lir-Ilir," a Javanese song that every Javanese child learns. Its lyrics are filled with deep Islamic symbolism:
+He composed "Lir-Ilir", a Javanese song that every Javanese child learns. Its lyrics are filled with deep Islamic symbolism:
 
 *Lir-ilir, lir-ilir, tandure wong sumilir*
 *Tak ijo royo-royo, tak senggo temanten anyar*
@@ -637,7 +637,7 @@ No white supremacy. No black supremacy. No Arab supremacy. Only righteousness ma
 
 ## Converting to Islam Is Simple
 
-In Javanese, we say "Kalimasada," the sacred sentence. In Arabic, the Shahada:
+In Javanese, we say "Kalimasada", the sacred sentence. In Arabic, the Shahada:
 
 أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ
 
