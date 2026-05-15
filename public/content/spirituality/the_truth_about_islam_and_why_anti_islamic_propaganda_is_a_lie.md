@@ -651,7 +651,7 @@ Millions of Javanese said these words because of the Wali Songo. They saw Islam 
 
 ## Where Does Real Inner Peace Come From?
 
-We do not need to get drunk. We do not need drugs. We do not need meaningless sex or endless entertainment. We need only to remember our Creator.
+We do not need to get drunk. We do not need drugs. We do not need endless entertainment. We need only to remember our Creator.
 
 "Verily, in the remembrance of Allah do hearts find rest." (Quran 13:28)
 
