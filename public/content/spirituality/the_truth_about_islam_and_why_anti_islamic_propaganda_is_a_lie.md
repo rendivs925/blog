@@ -63,15 +63,11 @@ Why? Because Islam denies their corrupt system.
 
 Let me give you clear examples:
 
-Islam forbids riba (interest/usury). That means the entire debt-based banking system is haram.
-
-Islam forbids alcohol. That means the alcohol industry loses demand.
-
-Islam forbids gambling. That means the gambling industry loses demand.
-
-Islam forbids zina (adultery and prostitution). That means the sex industry loses customers.
-
-Islam forbids oppression and corruption. That means tyrants and dictators lose control.
+- Islam forbids riba (interest/usury). That means the entire debt-based banking system is haram.
+- Islam forbids alcohol. That means the alcohol industry loses demand.
+- Islam forbids gambling. That means the gambling industry loses demand.
+- Islam forbids zina (adultery and prostitution). That means the sex industry loses customers.
+- Islam forbids oppression and corruption. That means tyrants and dictators lose control.
 
 Do you see now?
 
@@ -161,23 +157,15 @@ We need tazkiyatun nafs – purification of the self.
 
 We must remove all heart diseases:
 
-Pride, arrogance (kibr)
-
-Envy, jealousy (hasad)
-
-Showing off (riya'), love of praise
-
-Love of status and fame (hubb al-jah)
-
-Uncontrolled anger (ghadab)
-
-Heedlessness (ghaflah)
-
-Miserliness, greed (bukhl, hirs)
-
-Hypocrisy (nifaq)
-
-Self-admiration, vanity ('ujb)
+- Pride, arrogance (kibr)
+- Envy, jealousy (hasad)
+- Showing off (riya'), love of praise
+- Love of status and fame (hubb al-jah)
+- Uncontrolled anger (ghadab)
+- Heedlessness (ghaflah)
+- Miserliness, greed (bukhl, hirs)
+- Hypocrisy (nifaq)
+- Self-admiration, vanity ('ujb)
 
 We are trained to be kind.
 
@@ -191,11 +179,9 @@ Islam teaches ummah – one community that rises together.
 
 ## Final Proof: Look at the Results
 
-If Islam were truly violent and evil, why did Indonesia accept it without a single sword?
-
-Why did Muslims in Bali help Hindus during their ceremonies for centuries?
-
-Why do Christians in Indonesia live side by side with Muslims, going to each other's holidays?
+- If Islam were truly violent and evil, why did Indonesia accept it without a single sword?
+- Why did Muslims in Bali help Hindus during their ceremonies for centuries?
+- Why do Christians in Indonesia live side by side with Muslims, going to each other's holidays?
 
 The propaganda says Islam is violent.
 
@@ -219,4 +205,4 @@ The same heart diseases that the Quran warned about 1,400 years ago.
 
 And that is the proof.
 
-#IslamIsPeace #WaliSongo #IndonesiaHarmony #StopIslamophobia #HeartDiseases #TazkiyatunNafs
+`#IslamIsPeace` `#WaliSongo` `#IndonesiaHarmony` `#StopIslamophobia` `#HeartDiseases` `#TazkiyatunNafs`
