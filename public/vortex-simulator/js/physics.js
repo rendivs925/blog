@@ -50,6 +50,12 @@ export const state = {
   // discriminator membrane effect
   ganMembraneStress: 0,
   ganMembraneFlash: 0,
+
+  // Quantum vacuum physics
+  heisenbergLifetime: 0,
+  adiabaticRatio: 0,
+  quantumCoupling: 1,
+  casimirPressure: 0,
 };
 
 export function compute() {
@@ -73,10 +79,6 @@ export function compute() {
   s.vortexEstablished = omega > omega_crit;
   s.vortexStability = Math.min(1, Math.max(0, rawStability));
 
-  // Effective circulation: counter-rotating discs amplify the vortex
-  const effKappa = p.KAPPA_EFF * (1 + s.vortexStability * 0.5);
-  s.vortexCirculation = effKappa * omega;
-
   // --- RESEARCH FIX 2: HV enhances vacuum density coupling ---
   // Higher electric fields increase the interaction cross-section with
   // the vacuum's quantum phase, effectively raising ρ_eff.
@@ -84,8 +86,14 @@ export function compute() {
   s.hvCoupling = (hvDensityBoost - 1) * 3.33;
   s.vacuumDensityEff = p.RHO_EFF * (1 + s.vortexStability * 0.5) * hvDensityBoost;
 
+  // Effective flow velocity at disc edge: v = ω·R (forced vortex)
+  // This is the velocity that drives the Bernoulli pressure drop
+  s.v_eff = omega * p.R_DISC;
+
+  // True vortex circulation: Γ = 2π·R·v (for display)
+  s.vortexCirculation = 2 * Math.PI * p.R_DISC * s.v_eff;
+
   // Pressure drop from Bernoulli in the superfluid: ΔP = ½ρv²
-  s.v_eff = s.vortexCirculation;
   s.deltaP = 0.5 * s.vacuumDensityEff * s.v_eff * s.v_eff;
 
   // Pressure gradient driving the flow (ΔP / disc radius)
@@ -134,6 +142,33 @@ export function compute() {
     ? s.coilLoad * Math.min(1, s.P_harvest / 10000)
     : 0;
   s.backEmf += (targetBackEmf - s.backEmf) * 0.08;
+
+  // === QUANTUM VACUUM PHYSICS ===
+  // Heisenberg uncertainty: ΔE·Δt ≥ ħ/2
+  // The energy scale is the vacuum work done per cycle
+  const vacuumEnergy = s.deltaP * p.A_DISC * p.R_DISC;
+  const hbar = 1.0545718e-34;
+  const cLight = 299792458;
+  s.heisenbergLifetime = vacuumEnergy > 1e-30
+    ? hbar / (2 * vacuumEnergy)
+    : 1e-20;
+
+  // Adiabatic ratio: how fast the disc moves relative to vacuum response
+  // When ratio > 1, the motion is non-adiabatic → DCE regime
+  const vacResponseTime = (2 * p.DISC_OFFSET) / cLight;
+  const discPeriod = omega > 0 ? 1 / omega : Infinity;
+  s.adiabaticRatio = vacResponseTime > 0 && isFinite(discPeriod)
+    ? discPeriod / vacResponseTime
+    : 0;
+
+  // Quantum vacuum coupling: overall enhancement from quantum effects
+  // Combines phase coherence, non-adiabatic enhancement, and ZPE coupling
+  const phaseCoherence = Math.exp(-discPeriod / (s.heisenbergLifetime + 1e-30));
+  const nonAdiabatic = Math.min(1, 1 / (s.adiabaticRatio + 0.001));
+  s.quantumCoupling = 1 + phaseCoherence * nonAdiabatic * s.vortexStability;
+
+  // DCE intensity enhanced by quantum vacuum coupling
+  s.dceIntensity *= s.quantumCoupling;
 
   s.rpmSmooth += (s.RPM - s.rpmSmooth) * 0.05;
 

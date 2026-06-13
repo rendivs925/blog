@@ -27,6 +27,13 @@ export function updateHUD() {
   // Physics coupling metrics
   document.getElementById('hud-param').textContent = fmt(state.parametricGain, 2) + 'x';
   document.getElementById('hud-hv').textContent = fmt(state.hvCoupling, 1);
+  document.getElementById('hud-quantum').textContent = fmt(state.quantumCoupling, 2) + 'x';
+  const tau = state.heisenbergLifetime;
+  document.getElementById('hud-lifetime').textContent = tau > 1e-6
+    ? fmt(tau * 1e6, 1) + ' µs'
+    : tau > 1e-9
+      ? fmt(tau * 1e9, 1) + ' ns'
+      : fmt(tau * 1e12, 1) + ' ps';
 
   // Energy
   const P_in = state.P_motor + state.P_HV;
