@@ -7,7 +7,6 @@ const positions = new Float32Array(COUNT * 3);
 const velocities = new Float32Array(COUNT * 3);
 const lifetimes = new Float32Array(COUNT);
 const seeds = new Float32Array(COUNT);
-const radii0 = new Float32Array(COUNT);
 
 let points, geometry, material;
 let initialized = false;
@@ -20,7 +19,6 @@ export function buildParticles(scene) {
   for (let i = 0; i < COUNT; i++) {
     seedParticle(i, true);
     seeds[i] = Math.random() * 100;
-    radii0[i] = Math.sqrt(Math.random()) * sr;
   }
 
   geometry = new THREE.BufferGeometry();
@@ -86,7 +84,6 @@ export function updateParticles(delta) {
 
   const dt = delta * 60;
   const coreR = 0.006;
-  const off = PHYS.DISC_OFFSET;
   const circNorm = Math.min(1, circ / 50);
   const genNorm = Math.min(1, gen / (disc + 0.01));
 
@@ -132,13 +129,11 @@ export function updateParticles(delta) {
     const vzTarget = vTheta * cosT + vRadial * sinT;
     const vyTarget = vAxial;
 
-    // Coupling strength: how quickly particles advect with the superfluid
-    // Higher coupling = tighter flow following, lower = more drift
     const coupling = 0.12 * (1 + vs * 0.5);
 
-    ax = (vxTarget - vx) * coupling;
-    ay = (vyTarget - vy) * coupling;
-    az = (vzTarget - vz) * coupling;
+    let ax = (vxTarget - vx) * coupling;
+    let ay = (vyTarget - vy) * coupling;
+    let az = (vzTarget - vz) * coupling;
 
     // --- Superfluid quantum fluctuations (vacuum zero-point motion) ---
     if (vs > 0.1) {
