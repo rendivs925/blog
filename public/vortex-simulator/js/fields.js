@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { PHYS } from './constants.js';
 import { state } from './physics.js';
 
-let fieldPlane, canvas, ctx;
+let fieldPlane, fieldPlaneTop, canvas, ctx, canvasTop, ctxTop;
 let initialized = false;
 
 export function buildFields(scene) {
@@ -27,6 +27,28 @@ export function buildFields(scene) {
   fieldPlane.rotation.x = -Math.PI / 2;
   fieldPlane.position.y = -PHYS.DISC_OFFSET - 0.01;
   scene.add(fieldPlane);
+
+  // Upper field plane — cavity resonance between discs
+  canvasTop = document.createElement('canvas');
+  canvasTop.width = 64;
+  canvasTop.height = 64;
+  ctxTop = canvasTop.getContext('2d');
+  const texTop = new THREE.CanvasTexture(canvasTop);
+  const matTop = new THREE.MeshBasicMaterial({
+    map: texTop,
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  fieldPlaneTop = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.5, 0.5),
+    matTop
+  );
+  fieldPlaneTop.rotation.x = -Math.PI / 2;
+  fieldPlaneTop.position.y = PHYS.DISC_OFFSET + 0.01;
+  scene.add(fieldPlaneTop);
 
   initialized = true;
 }
@@ -103,4 +125,43 @@ export function updateFields(time) {
   ctx.putImageData(imageData, 0, 0);
   fieldPlane.material.map.needsUpdate = true;
   fieldPlane.material.opacity = Math.min(0.45, 0.05 + vs * 0.28 + be * 0.08);
+
+  // Upper plane: cavity resonance + standing wave pattern
+  const imgTop = ctxTop.createImageData(64, 64);
+  const dataTop = imgTop.data;
+  const cx2 = 32, cy2 = 32;
+  for (let y = 0; y < 64; y++) {
+    for (let x = 0; x < 64; x++) {
+      const dx = x - cx2;
+      const dy = y - cy2;
+      const r2 = Math.sqrt(dx * dx + dy * dy);
+      const idx2 = (y * 64 + x) * 4;
+      if (r2 > 30) { dataTop[idx2 + 3] = 0; continue; }
+
+      const normR2 = r2 / 30;
+      const pressure2 = vs * density * 2 * (1 / (normR2 + 0.05) - 0.5);
+      let int2 = Math.min(1, pressure2 * 1.0);
+
+      // Standing wave resonance: cos(k·r) pattern from cavity mode
+      const k = 6 + vs * 4 + be * 2;
+      const resWave = Math.cos(r2 * k - time * 4) * 0.5 + 0.5;
+      int2 *= 1 + resWave * 0.3 * vs;
+
+      // Parametric resonance rings
+      const paramRings = Math.sin(r2 * 3 - time * 2) * 0.3 + 0.7;
+      int2 *= paramRings;
+
+      int2 = Math.min(1, Math.max(0, int2));
+      const rV = Math.floor(15 + 50 * Math.pow(int2, 0.8));
+      const gV = Math.floor(10 + 70 * Math.pow(int2, 0.7));
+      const bV = Math.floor(30 + 150 * int2);
+      dataTop[idx2] = Math.min(255, rV);
+      dataTop[idx2 + 1] = Math.min(255, gV);
+      dataTop[idx2 + 2] = Math.min(255, bV);
+      dataTop[idx2 + 3] = Math.floor(100 * int2);
+    }
+  }
+  ctxTop.putImageData(imgTop, 0, 0);
+  fieldPlaneTop.material.map.needsUpdate = true;
+  fieldPlaneTop.material.opacity = Math.min(0.25, 0.02 + vs * 0.12 + be * 0.04);
 }

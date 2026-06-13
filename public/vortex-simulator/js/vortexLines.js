@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { PHYS } from './constants.js';
 import { state } from './physics.js';
 
-let group, funnelTop, funnelBot;
+let group, funnelTop, funnelBot, circRings;
 let initialized = false;
 
 export function buildVortex(scene) {
@@ -57,6 +57,30 @@ export function buildVortex(scene) {
   group.add(funnelTop);
   group.add(funnelBot);
 
+  // Circulation rings — show vortex cross-section at various heights
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0x55aadd,
+    transparent: true,
+    opacity: 0.06,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  circRings = new THREE.Group();
+  for (let ri = 0; ri < 8; ri++) {
+    const t = (ri + 0.5) / 8;
+    const yPos = off * (1 - 2 * t);
+    const radius = 0.003 + 0.027 * Math.pow(Math.abs(yPos) / off, 1.5);
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 1.5, 0.001, 8, 24),
+      ringMat.clone()
+    );
+    ring.position.y = yPos;
+    ring.rotation.x = Math.PI / 2;
+    circRings.add(ring);
+  }
+  group.add(circRings);
+
   scene.add(group);
   initialized = true;
 }
@@ -94,4 +118,15 @@ export function updateVortex(time, delta) {
   const scale = (0.3 + circNorm * 1.0) * pinch;
   funnelTop.scale.set(scale, 1 + be * 0.05, scale);
   funnelBot.scale.set(scale, 1 + be * 0.05, scale);
+
+  // Circulation rings: pulse with vortex strength, rotate with flow
+  circRings.rotation.y += state.omega * 0.05 * dt;
+  const ringScale = (0.2 + circNorm * 0.85) * pinch;
+  const ringOp = 0.02 + circNorm * 0.08 + pulseFlash * 0.06;
+  const ringLit = 0.2 + circNorm * 0.25 + pulseFlash * 0.1;
+  circRings.children.forEach((ring) => {
+    ring.scale.setScalar(ringScale);
+    ring.material.opacity = ringOp;
+    ring.material.color.setHSL(hue + 0.02, 0.5, ringLit);
+  });
 }

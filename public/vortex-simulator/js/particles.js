@@ -7,6 +7,8 @@ const positions = new Float32Array(COUNT * 3);
 const velocities = new Float32Array(COUNT * 3);
 const lifetimes = new Float32Array(COUNT);
 const seeds = new Float32Array(COUNT);
+const stages = new Uint8Array(COUNT);
+const colors = new Float32Array(COUNT * 3);
 
 let points, geometry, material;
 let initialized = false;
@@ -23,6 +25,7 @@ export function buildParticles(scene) {
 
   geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
   const canvas = document.createElement('canvas');
   canvas.width = 32;
@@ -43,7 +46,7 @@ export function buildParticles(scene) {
     depthWrite: false,
     transparent: true,
     opacity: 0.55,
-    color: 0x88bbee,
+    vertexColors: true,
     sizeAttenuation: true,
   });
 
@@ -89,6 +92,22 @@ export function updateParticles(delta) {
 
   const pulseBurst = pa && ganTrans > 0.5 ? 0.02 : 0;
   const pulseInrush = pa && pulseSnap < 0.3 ? 0.005 : 0;
+
+  // Pre-compute stage colors for chain reaction visibility
+  const stageColData = [
+    [0.60, 0.35, 0.40],  // inflow: blue
+    [0.55, 0.50, 0.55],  // circ:  cyan
+    [0.72, 0.30, 0.70],  // core:  violet-white
+    [0.08, 0.60, 0.50],  // eject: orange
+  ];
+  const stageCols = new Float32Array(12);
+  const tmpCol = new THREE.Color();
+  for (let si = 0; si < 4; si++) {
+    tmpCol.setHSL(stageColData[si][0], stageColData[si][1], stageColData[si][2]);
+    stageCols[si * 3] = tmpCol.r;
+    stageCols[si * 3 + 1] = tmpCol.g;
+    stageCols[si * 3 + 2] = tmpCol.b;
+  }
 
   for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
@@ -175,16 +194,29 @@ export function updateParticles(delta) {
     velocities[idx + 1] = vy;
     velocities[idx + 2] = vz;
 
+    // Determine particle stage (chain reaction visibility)
+    const off = PHYS.DISC_OFFSET;
+    let stage;
+    if (r > 0.18) stage = 0;
+    else if (r > 0.03) stage = 1;
+    else if (absY < off * 0.5) stage = 2;
+    else stage = 3;
+    stages[i] = stage;
+
+    // Stage-based color (inflow→circ→core→eject)
+    colors[idx] = stageCols[stage * 3];
+    colors[idx + 1] = stageCols[stage * 3 + 1];
+    colors[idx + 2] = stageCols[stage * 3 + 2];
+
     lifetimes[i] -= delta;
   }
 
   geometry.attributes.position.needsUpdate = true;
+  geometry.attributes.color.needsUpdate = true;
 
   const avgIntensity = Math.min(1, circNorm * 0.5 + genNorm * 0.2 + (pa ? 0.15 : 0));
-  const hue = 0.60 - avgIntensity * 0.10;
-  material.color.setHSL(hue, 0.3 + avgIntensity * 0.3, 0.4 + avgIntensity * 0.4);
-  material.opacity = Math.min(0.85, 0.15 + vs * 0.4 + be * 0.08 + genNorm * 0.15);
-  material.size = 0.008 + avgIntensity * 0.008;
+  material.opacity = Math.min(0.85, 0.12 + vs * 0.35 + be * 0.08 + genNorm * 0.15);
+  material.size = 0.007 + avgIntensity * 0.008;
 }
 
 export function burstParticles(count) {
