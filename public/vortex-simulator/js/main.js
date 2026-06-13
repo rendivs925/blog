@@ -12,7 +12,7 @@ import { buildScene, updateScene } from './sceneObjects.js';
 import { buildVortex, updateVortex } from './vortexLines.js';
 import { buildParticles, updateParticles } from './particles.js';
 import { buildFields, updateFields } from './fields.js';
-import { buildPulse, updatePulse, updatePumpWave, updateGAN } from './dcePulse.js';
+import { buildPulse, updatePumpWave, updateGAN } from './dcePulse.js';
 import { updateHUD } from './hud.js';
 import { setupControls, isPaused } from './controlsUI.js';
 
@@ -111,7 +111,6 @@ function animate() {
       updateScene(simTime, delta);
       updateVortex(simTime);
       updateParticles(delta);
-      updatePulse(simTime);
       updateGAN(delta);
 
       if (perfCounter % 2 === 0) updateFields(simTime);

@@ -368,6 +368,4 @@ export function updateScene(time, delta) {
   membrane.rotation.z = time * 0.5;
 }
 
-export function getCoilPosition() {
-  return { x: 0, y: 0, z: 0 };
-}
+
