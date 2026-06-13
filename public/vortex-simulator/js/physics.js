@@ -11,6 +11,7 @@ export const state = {
   omega: 0,
   B_eff: 0,
   deltaP: 0,
+  v_eff: 0,
   F_lift: 0,
   P_harvest: 0,
   P_motor: 0,
@@ -26,6 +27,12 @@ export const state = {
   pulseActive: false,
   pulsePhase: 0,
   rpmSmooth: 5000,
+
+  vacuumDensityEff: 0,
+  vortexCirculation: 0,
+  pressureGradient: 0,
+  pulseEnergyRelease: 0,
+  netEnergy: 0,
 };
 
 export function compute() {
@@ -34,47 +41,64 @@ export function compute() {
   const omega = 2 * Math.PI * s.RPM / 60;
   s.omega = omega;
 
-  // Effective magnetic field with HV enhancement
   s.B_eff = s.magnetStrength * p.B_REM * (1 + 0.01 * s.HV_kV / 50);
 
-  // Vortex nucleation threshold
+  // Vortex nucleation threshold with magnet bias
   const omega_crit = p.OMEGA_CRIT * (1 - 0.15 * s.magnetStrength);
   const rawStability = omega > omega_crit ? (omega - omega_crit) / (2 * omega_crit) : 0;
   s.vortexEstablished = omega > omega_crit;
   s.vortexStability = Math.min(1, Math.max(0, rawStability));
 
-  // Vortex dipole coupling term: counter-rotation enhances effective circulation
+  // Effective circulation: counter-rotating discs amplify the vortex
   const effKappa = p.KAPPA_EFF * (1 + s.vortexStability * 0.5);
-  const v_eff = effKappa * omega;
-  s.deltaP = 0.5 * p.RHO_EFF * v_eff * v_eff;
+  s.vortexCirculation = effKappa * omega;
 
-  // Lift: pressure + magnetic pressure coupling
+  // Core vacuum density — the medium density the vortex couples to
+  s.vacuumDensityEff = p.RHO_EFF * (1 + s.vortexStability * 0.5);
+
+  // Pressure drop from Bernoulli in the superfluid: ΔP = ½ρv²
+  s.v_eff = s.vortexCirculation;
+  s.deltaP = 0.5 * s.vacuumDensityEff * s.v_eff * s.v_eff;
+
+  // Pressure gradient driving the flow (ΔP / disc radius)
+  s.pressureGradient = s.deltaP / p.R_DISC;
+
+  // Lift: pressure area + magnetic pressure coupling
   const F_pressure = p.A_DISC * s.deltaP;
   const B2_over_2mu0 = s.B_eff * s.B_eff / (2 * p.MU0);
   const F_mag = p.C_MAG_LIFT * B2_over_2mu0 * p.A_DISC * s.vortexStability;
   s.F_lift = F_pressure + F_mag;
 
-  // Steering deflection (approximate lateral force)
+  // Steering
   const steerMag = Math.sqrt(s.steerX * s.steerX + s.steerY * s.steerY);
   s.steerForce = steerMag * s.F_lift * 0.15;
 
-  // Harvested power via DCE in convergent cylindrical geometry
+  // Harvest: P = η · A_coil · ω · ΔP · (1 + G_conv · stability)
+  // This is the key ω³ scaling: ΔP ∝ ω², times ω gives ω³
   const convergeGain = p.G_CONV * s.vortexStability;
   const basePower = p.DCE_ETA * p.A_COIL * omega * s.deltaP;
-  s.P_harvest = basePower * s.coilLoad * (1 + convergeGain);
+  const P_harvest_raw = basePower * s.coilLoad * (1 + convergeGain);
 
-  // DCE pulse intensity for visual system
+  // DCE pulse injects a burst of energy from vacuum — appears as harvest spike
+  // The vacuum's ambient pressure does work during the collapse phase
+  // This is modeled as fractional gain that depends on pulse frequency
+  const pulseBoost = 1 + s.pulseEnergyRelease * 0.001;
+  s.P_harvest = P_harvest_raw * pulseBoost;
+
+  // DCE intensity for triggering pulses
   s.dceIntensity = s.vortexEstablished
     ? (s.coilLoad * s.vortexStability * (1 + convergeGain * 0.1))
     : 0;
 
-  // Back EMF: Lenz's law reaction — energy extraction perturbs the vortex
+  // Pulse energy decays: each pulse adds a spike, it decays over time
+  s.pulseEnergyRelease *= 0.92;
+
+  // Back EMF from Lenz's law
   const targetBackEmf = s.vortexEstablished
     ? s.coilLoad * Math.min(1, s.P_harvest / 10000)
     : 0;
   s.backEmf += (targetBackEmf - s.backEmf) * 0.08;
 
-  // Smooth RPM for wave animations
   s.rpmSmooth += (s.RPM - s.rpmSmooth) * 0.05;
 
   // Losses
@@ -83,16 +107,14 @@ export function compute() {
   const P_mag_drag = p.C_MAG_DRAG * s.B_eff * s.B_eff * Math.pow(omega, 2);
   s.P_loss = P_bearing + P_windage + P_mag_drag;
 
-  // HV supply power
+  // HV supply
   s.P_HV = (s.HV_kV * 1000) * (s.HV_kV * 1000) / p.R_LEAKAGE;
 
-  // Total input = motor losses (which include the harvested energy extracted as drag)
-  // The key insight: in a COP>1 system, the harvested power appears as negative drag
-  // Net mechanical power = motor_losses - harvested_extraction_drag
-  // But for the COP calculation:
+  // Motor input = losses (bearing + windage + magnetic drag)
   s.P_motor = s.P_loss;
   const P_in = s.P_motor + s.P_HV;
   s.COP = s.P_harvest > 0 && P_in > 0 ? s.P_harvest / P_in : 0;
+  s.netEnergy = s.P_harvest - P_in;
 }
 
 export function getStatus() {

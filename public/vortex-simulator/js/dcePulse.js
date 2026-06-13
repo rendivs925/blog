@@ -36,9 +36,14 @@ export function triggerPulse() {
   state.pulsePhase = 0;
   pulseStart = performance.now();
 
+  // DCE pulse releases energy from vacuum: the sudden boundary change
+  // triggers the Ponderomotive collapse — vacuum pressure rushes in,
+  // doing work on the coil as Back EMF. This appears as a harvest spike.
+  state.pulseEnergyRelease = Math.min(200, state.P_harvest * 0.15 + 20);
+
   pulseGroup = new THREE.Group();
 
-  // Bright expansion sphere above center
+  // Expanding spherical wavefront (virtual pair creation)
   const sphereMat = new THREE.MeshBasicMaterial({
     color: 0x44ddff,
     transparent: true,
@@ -51,13 +56,13 @@ export function triggerPulse() {
   s1.position.y = 0.025;
   pulseGroup.add(s1);
 
-  // Counterpart below (virtual pair)
+  // Counterpart (symmetric pair production)
   const s2 = new THREE.Mesh(sphereGeo.clone(), sphereMat.clone());
   s2.material.color.setHex(0xcc88ff);
   s2.position.y = -0.025;
   pulseGroup.add(s2);
 
-  // Expanding equatorial ring
+  // Equatorial shock ring — the vacuum ripple
   const ringMat = new THREE.MeshBasicMaterial({
     color: 0x66ddcc,
     transparent: true,
@@ -73,7 +78,7 @@ export function triggerPulse() {
   ring.rotation.x = -Math.PI / 2;
   pulseGroup.add(ring);
 
-  // Center flash sphere
+  // Center flash — the cavitation spark
   const flashMat = new THREE.MeshBasicMaterial({
     color: 0x88ddff,
     transparent: true,
@@ -87,7 +92,7 @@ export function triggerPulse() {
   flash.position.y = 0;
   pulseGroup.add(flash);
 
-  // Point light flash
+  // Light burst
   const flashLight = new THREE.PointLight(0x66ccff, 0, 0.5);
   pulseGroup.add(flashLight);
 
@@ -115,15 +120,13 @@ export function updatePulse() {
   const s = 1 + elapsed * 8;
   const op = 1 - elapsed;
 
-  // Upper sphere
+  // Expanding wavefront
   pulseGroup.children[0].scale.set(s, s, s);
   pulseGroup.children[0].material.opacity = op * 0.35;
-
-  // Lower sphere
   pulseGroup.children[1].scale.set(s * 0.85, s * 0.85, s * 0.85);
   pulseGroup.children[1].material.opacity = op * 0.25;
 
-  // Expanding ring
+  // Shock ring
   const ring = pulseGroup.children[2];
   const ri = 0.002 + elapsed * 0.05;
   const ro = ri + 0.006 + elapsed * 0.015;
@@ -131,12 +134,12 @@ export function updatePulse() {
   ring.geometry = new THREE.RingGeometry(ri, ro, 48);
   ring.material.opacity = op * 0.5 * (1 - Math.abs(elapsed - 0.25) * 2.5);
 
-  // Center flash
+  // Flash
   const flash = pulseGroup.children[3];
   flash.scale.setScalar(1 + elapsed * 10);
   flash.material.opacity = op * 0.8;
 
-  // Light
+  // Light intensity
   pulseGroup.children[4].intensity = op * 0.8;
 }
 

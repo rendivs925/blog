@@ -219,6 +219,22 @@ input[type="range"]::-moz-range-thumb {
 .status-warn { color: #c08040; }
 .status-ok { color: #50a080; }
 
+/* Energy bar */
+.hud-bar-wrap {
+  height: 2px;
+  background: rgba(80, 120, 160, 0.12);
+  border-radius: 1px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.hud-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 1px;
+  transition: width 0.15s, box-shadow 0.1s;
+}
+
 .hud-val {
   transition: color 0.2s ease;
 }

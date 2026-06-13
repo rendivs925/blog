@@ -66,19 +66,24 @@ export function updateVortex(time) {
 
   const vs = state.vortexStability;
   const be = state.backEmf;
+  const circ = state.vortexCirculation;
 
   // Pulse flash
   const pulseFlash = state.pulseActive
     ? Math.sin(state.pulsePhase * Math.PI) * 0.5
     : 0;
 
-  // Back-EMF shimmer: vortex reacts to energy extraction
+  // Back-EMF shimmer — vortex reacts to energy extraction
   const shimmerFreq = 25 + be * 20;
   const shimmer = be * 0.15 * Math.sin(time * shimmerFreq + state.rpmSmooth * 0.003);
 
-  // Opacity modulated by everything
-  const opacity = Math.min(1, 0.05 + vs * 0.5 + pulseFlash * 0.35);
-  const bright = 0.3 + vs * 0.6 + pulseFlash * 0.4;
+  // Circulation determines brightness and opacity
+  const circNorm = Math.min(1, circ / 50);
+  const opacity = Math.min(1, 0.05 + circNorm * 0.65 + pulseFlash * 0.35);
+  const bright = 0.3 + circNorm * 0.6 + pulseFlash * 0.4;
+
+  // Color shifts with circulation strength
+  const hue = 0.58 - circNorm * 0.06 - be * 0.02;
 
   const rotSpeed = state.omega * 0.15 * vs;
   funnelTop.rotation.y += (rotSpeed + shimmer * 0.5) * 0.016;
@@ -86,12 +91,12 @@ export function updateVortex(time) {
 
   funnelTop.material.opacity = opacity;
   funnelBot.material.opacity = opacity * 0.6;
-  funnelTop.material.color.setHSL(0.57 - vs * 0.05, 0.5, bright * 0.4);
-  funnelBot.material.color.setHSL(0.54 - vs * 0.05, 0.6, bright * 0.3);
+  funnelTop.material.color.setHSL(hue, 0.5, bright * 0.4);
+  funnelBot.material.color.setHSL(hue - 0.03, 0.6, bright * 0.3);
 
-  // Scale pinch from back EMF — vortex compresses under load
+  // Scale pinch from back EMF
   const pinch = 1 - be * 0.15;
-  const scale = (0.3 + vs * 1.0) * pinch;
+  const scale = (0.3 + circNorm * 1.0) * pinch;
   funnelTop.scale.set(scale, 1 + be * 0.05, scale);
   funnelBot.scale.set(scale, 1 + be * 0.05, scale);
 }

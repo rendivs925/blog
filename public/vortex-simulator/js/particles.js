@@ -69,14 +69,19 @@ export function updateParticles(delta) {
   const be = state.backEmf;
   const pulseActive = state.pulseActive;
   const pulsePhase = state.pulsePhase;
+  const circ = state.vortexCirculation;
 
   const dt = delta * 60;
   const sr = PHYS.PARTICLE_SPAWN_RADIUS;
   const sh = PHYS.PARTICLE_SPAWN_HEIGHT;
   const coreR = 0.003;
 
-  // Pulse shockwave: outward radial impulse that evolves over pulse lifetime
-  const pulseKickStr = pulseActive ? Math.sin(pulsePhase * Math.PI) : 0;
+  // Pulse: outward burst then inward rush
+  // The DCE pulse creates a void (outward) then vacuum rushes in (inward)
+  const pulseOut = pulseActive ? Math.sin(pulsePhase * Math.PI) : 0;
+  const pulseIn = pulseActive ? Math.sin(pulsePhase * Math.PI * 2) * (1 - pulsePhase) * 0.5 : 0;
+  // PulseKick combines both: early phase = outward, late phase = enhanced inward
+  const pulseKick = pulseOut * 0.004 - pulseIn * 0.006;
 
   for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
@@ -109,11 +114,12 @@ export function updateParticles(delta) {
 
     const safeR = Math.max(r, coreR);
 
-    // Inward spiral — base flow
-    const radialSpeed = vs * 0.0009 / (safeR + 0.005);
+    // Circulation-driven inflow
+    const circNorm = Math.min(1, circ / 50);
+    const radialSpeed = circNorm * 0.0012 / (safeR + 0.005);
 
-    // Pulse kick pushes particles outward from center
-    const pulseRadial = pulseKickStr * 0.004 / (safeR + 0.001);
+    // Net radial: inward spiral + pulse kick (pos = inward, neg = outward)
+    const netRadial = Math.max(0, radialSpeed - pulseKick);
 
     const angSpeed = vs * 0.25 * (1 / (safeR + 0.005) - 3);
 
@@ -126,11 +132,7 @@ export function updateParticles(delta) {
     const turbZ = Math.cos(seeds[i] + timeAccum * (2.3 + be * 1.5) + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * turbAmp;
     const turbY = Math.sin(seeds[i] + timeAccum * (1.7 + be * 1.2) + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * turbAmp * 0.75;
 
-    // Pulse vertical scatter
-    const pulseY = pulseKickStr * 0.003 * Math.sin(seeds[i] * 10);
-
     // Apply motion
-    const netRadial = radialSpeed - pulseRadial; // pulse opposes inward spiral
     const nx = x + (netRadial * (-x / safeR) + turbX) * dt;
     const nz = z + (netRadial * (-z / safeR) + turbZ) * dt;
 
@@ -140,7 +142,7 @@ export function updateParticles(delta) {
     const rz = newR * Math.sin(newTheta);
 
     positions[idx] = rx;
-    positions[idx + 1] = y + (axialDir * axialSpeed + turbY + pulseY) * dt;
+    positions[idx + 1] = y + (axialDir * axialSpeed + turbY) * dt;
     positions[idx + 2] = rz;
 
     lifetimes[i] -= delta;
@@ -148,8 +150,8 @@ export function updateParticles(delta) {
 
   geometry.attributes.position.needsUpdate = true;
 
-  // Particle color: shifts with back-EMF too
-  const hue = 0.58 - vs * 0.1 - be * 0.03;
+  // Color shifts with circulation
+  const hue = 0.58 - Math.min(1, circ / 50) * 0.1 - be * 0.03;
   material.color.setHSL(hue, 0.3 + vs * 0.4, 0.4 + vs * 0.5);
   material.opacity = Math.min(1, 0.15 + vs * 0.55 + be * 0.1);
 }
