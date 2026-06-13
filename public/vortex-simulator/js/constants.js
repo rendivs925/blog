@@ -1,8 +1,9 @@
 export const PHYS = {
-  // Disc geometry
+  // Disc geometry (m)
   R_DISC: 0.15,
   H_DISC: 0.003,
   DISC_OFFSET: 0.12,
+  A_DISC: Math.PI * 0.15 * 0.15,
 
   // Magnet
   B_REM: 1.48,
@@ -11,33 +12,43 @@ export const PHYS = {
   MAGNET_H: 0.004,
   MAGNET_D: 0.008,
   MAGNET_RADIUS: 0.12,
+  A_MAGNET: 0.02 * 0.008,
 
   // Coil
   A_COIL: 0.01,
   COIL_RADIUS: 0.08,
   COIL_TUBE: 0.008,
+  COIL_TURNS: 100,
 
   // Steering
   STEER_RADIUS: 0.22,
   STEER_TUBE: 0.003,
 
-  // Physics
-  HV_MAX: 50e3,
+  // --- Physics: Superfluid Vacuum Vortex ---
+  OMEGA_CRIT: 200,
+  RHO_EFF: 0.03,
+  KAPPA_EFF: 0.15,
+
+  // Magnetic pressure coupling
+  C_MAG_LIFT: 0.0008,
+
+  // Convergent geometry amplification
+  G_CONV: 20,
+
+  // DCE parametric extraction
+  DCE_ETA: 0.85,
+  DCE_COUPLING: 0.01,
+  DCE_PULSE_INTERVAL: 0.4,
+
+  // Losses
+  C_BEARING: 0.01,
+  C_WINDAGE: 5e-5,
+  C_MAG_DRAG: 1e-9,
   R_LEAKAGE: 1e9,
-  RHO_VAC: 1e-9,
-  H: 6.626e-34,
-  HBAR: 1.054e-34,
-  M_E: 9.109e-31,
-  A0: 1e-12,
-  MU0: 4 * Math.PI * 1e-7,
-  ETA: 0.85,
-  ALPHA_B: 0.01,
-  C_BEARING: 1e-5,
-  C_WINDAGE: 1e-8,
-  C_MAG: 1e-10,
+
+  HV_MAX: 50e3,
 
   // Vortex visual
-  VORTEX_CORE_RADIUS: 0.005,
   VORTEX_SEGMENTS: 64,
 
   // Particle
@@ -45,4 +56,7 @@ export const PHYS = {
   PARTICLE_SPAWN_RADIUS: 0.35,
   PARTICLE_SPAWN_HEIGHT: 0.5,
   PARTICLE_LIFETIME: 3.0,
+
+  // Constants
+  MU0: 4 * Math.PI * 1e-7,
 };

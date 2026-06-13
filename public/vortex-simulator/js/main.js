@@ -9,7 +9,7 @@ import { buildScene, updateScene } from './sceneObjects.js';
 import { buildVortex, updateVortex } from './vortexLines.js';
 import { buildParticles, updateParticles } from './particles.js';
 import { buildFields, updateFields } from './fields.js';
-import { buildPulse, updatePulse, checkAndTriggerPulse } from './dcePulse.js';
+import { buildPulse, updatePulse, checkAndTriggerPulse, updatePumpWave } from './dcePulse.js';
 import { updateHUD } from './hud.js';
 import { setupControls, isPaused } from './controlsUI.js';
 
@@ -43,7 +43,7 @@ const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(w, h),
-  0.4, 0.3, 0.5
+  0.25, 0.5, 0.4
 );
 composer.addPass(bloomPass);
 
@@ -83,30 +83,41 @@ setupControls(camera, controls);
 
 // Status text
 const statusEl = document.getElementById('status-text');
+statusEl.className = 'status-idle';
 
 const clock = new THREE.Clock();
 let pulseTimer = 0;
+let perfCounter = 0;
 
 function animate() {
   requestAnimationFrame(animate);
 
+  if (document.hidden) {
+    clock.getDelta();
+    return;
+  }
+
   const delta = Math.min(clock.getDelta(), 0.05);
   const time = clock.elapsedTime;
+  perfCounter++;
 
   if (!isPaused()) {
     compute();
     updateScene(time);
     updateVortex(time);
     updateParticles(delta);
-    updateFields();
     updatePulse();
 
+    // Throttle CPU-heavy field update to every 3rd frame
+    if (perfCounter % 3 === 0) updateFields();
+
     pulseTimer += delta;
-    if (pulseTimer > 0.5) {
+    if (pulseTimer > PHYS.DCE_PULSE_INTERVAL) {
       checkAndTriggerPulse(time);
       pulseTimer = 0;
     }
 
+    updatePumpWave();
     updateHUD();
 
     const status = getStatus();

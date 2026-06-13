@@ -2,13 +2,15 @@ import * as THREE from 'three';
 import { PHYS } from './constants.js';
 import { state } from './physics.js';
 
+const COUNT = PHYS.PARTICLE_COUNT;
+const positions = new Float32Array(COUNT * 3);
+const sizes = new Float32Array(COUNT);
+const lifetimes = new Float32Array(COUNT);
+const seeds = new Float32Array(COUNT);
+const initialR = new Float32Array(COUNT);
+const initialY = new Float32Array(COUNT);
+
 let points, geometry, material;
-const positions = new Float32Array(PHYS.PARTICLE_COUNT * 3);
-const sizes = new Float32Array(PHYS.PARTICLE_COUNT);
-const lifetimes = new Float32Array(PHYS.PARTICLE_COUNT);
-const seeds = new Float32Array(PHYS.PARTICLE_COUNT);
-const spawnRadii = new Float32Array(PHYS.PARTICLE_COUNT);
-const spawnHeights = new Float32Array(PHYS.PARTICLE_COUNT);
 let initialized = false;
 let timeAccum = 0;
 
@@ -16,18 +18,10 @@ export function buildParticles(scene) {
   const sr = PHYS.PARTICLE_SPAWN_RADIUS;
   const sh = PHYS.PARTICLE_SPAWN_HEIGHT;
 
-  for (let i = 0; i < PHYS.PARTICLE_COUNT; i++) {
-    const theta = Math.random() * Math.PI * 2;
-    const r = sr * (0.5 + Math.random() * 0.5);
-    const y = (Math.random() - 0.5) * sh * 2;
-    positions[i * 3] = r * Math.cos(theta);
-    positions[i * 3 + 1] = y;
-    positions[i * 3 + 2] = r * Math.sin(theta);
-    sizes[i] = 0.002 + Math.random() * 0.004;
-    lifetimes[i] = Math.random() * PHYS.PARTICLE_LIFETIME;
+  for (let i = 0; i < COUNT; i++) {
+    seedParticle(i, sr, sh);
+    sizes[i] = 0.002 + Math.random() * 0.005;
     seeds[i] = Math.random() * 100;
-    spawnRadii[i] = r;
-    spawnHeights[i] = y;
   }
 
   geometry = new THREE.BufferGeometry();
@@ -39,9 +33,10 @@ export function buildParticles(scene) {
   canvas.height = 64;
   const ctx = canvas.getContext('2d');
   const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  gradient.addColorStop(0, 'rgba(100, 200, 255, 1)');
-  gradient.addColorStop(0.3, 'rgba(50, 150, 255, 0.8)');
-  gradient.addColorStop(1, 'rgba(0, 50, 150, 0)');
+  gradient.addColorStop(0, 'rgba(100, 220, 255, 1)');
+  gradient.addColorStop(0.25, 'rgba(60, 180, 255, 0.9)');
+  gradient.addColorStop(0.6, 'rgba(20, 80, 200, 0.5)');
+  gradient.addColorStop(1, 'rgba(0, 20, 80, 0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 64, 64);
   const texture = new THREE.CanvasTexture(canvas);
@@ -52,8 +47,9 @@ export function buildParticles(scene) {
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     transparent: true,
-    opacity: 0.6,
-    color: 0x88ccff,
+    opacity: 0.7,
+    color: 0x88ddff,
+    sizeAttenuation: true,
   });
 
   points = new THREE.Points(geometry, material);
@@ -61,26 +57,55 @@ export function buildParticles(scene) {
   initialized = true;
 }
 
+function seedParticle(i, sr, sh) {
+  const theta = Math.random() * Math.PI * 2;
+  const r = sr * (0.3 + Math.random() * 0.7);
+  const y = (Math.random() - 0.5) * sh * 2;
+  positions[i * 3] = r * Math.cos(theta);
+  positions[i * 3 + 1] = y;
+  positions[i * 3 + 2] = r * Math.sin(theta);
+  lifetimes[i] = PHYS.PARTICLE_LIFETIME * (0.5 + Math.random() * 0.5);
+  initialR[i] = r;
+  initialY[i] = y;
+}
+
 export function updateParticles(delta) {
   if (!initialized) return;
   timeAccum += delta;
 
-  const vortexStr = state.vortexStability * 1.5;
+  const vs = state.vortexStability;
+  const omega = state.omega;
+  const dt = delta * 60;
+  const sr = PHYS.PARTICLE_SPAWN_RADIUS;
+  const sh = PHYS.PARTICLE_SPAWN_HEIGHT;
+  const coreR = 0.003;
 
-  for (let i = 0; i < PHYS.PARTICLE_COUNT; i++) {
+  for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
-    const x = positions[idx];
-    const y = positions[idx + 1];
-    const z = positions[idx + 2];
+    let x = positions[idx];
+    let y = positions[idx + 1];
+    let z = positions[idx + 2];
     const r = Math.sqrt(x * x + z * z);
 
-    if (lifetimes[i] <= 0 || r < 0.003) {
-      const theta = Math.random() * Math.PI * 2;
-      const rr = PHYS.PARTICLE_SPAWN_RADIUS * (0.5 + Math.random() * 0.5);
-      positions[idx] = rr * Math.cos(theta);
-      positions[idx + 1] = (Math.random() - 0.5) * PHYS.PARTICLE_SPAWN_HEIGHT * 2;
-      positions[idx + 2] = rr * Math.sin(theta);
-      lifetimes[i] = PHYS.PARTICLE_LIFETIME * (0.5 + Math.random() * 0.5);
+    // Respawn if dead or swallowed by core
+    if (lifetimes[i] <= 0 || r < coreR) {
+      // DCE burst check: if rotating and near core, burst outward instead of normal respawn
+      if (r < coreR && vs > 0.3 && Math.random() < 0.15) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI;
+        const speed = 0.02 + vs * 0.06;
+        positions[idx] = speed * Math.sin(phi) * Math.cos(theta);
+        positions[idx + 1] = speed * Math.cos(phi);
+        positions[idx + 2] = speed * Math.sin(phi) * Math.sin(theta);
+        lifetimes[i] = 0.3 + Math.random() * 0.5;
+      } else {
+        const theta = Math.random() * Math.PI * 2;
+        const rr = sr * (0.3 + Math.random() * 0.7);
+        positions[idx] = rr * Math.cos(theta);
+        positions[idx + 1] = (Math.random() - 0.5) * sh * 2;
+        positions[idx + 2] = rr * Math.sin(theta);
+        lifetimes[i] = PHYS.PARTICLE_LIFETIME * (0.5 + Math.random() * 0.5);
+      }
       continue;
     }
 
@@ -89,44 +114,62 @@ export function updateParticles(delta) {
       continue;
     }
 
-    const radialDirX = -x / r;
-    const radialDirZ = -z / r;
-    const radialSpeed = vortexStr * (0.02 / (r + 0.005));
+    const safeR = Math.max(r, coreR);
+    const theta = Math.atan2(z, x);
 
+    // Radial velocity: inward, accelerating near core (1/r sink flow)
+    const radialSpeed = vs * 0.8 / (safeR + 0.01);
+
+    // Angular velocity: differential rotation (Kepler-like: faster near center)
+    const angSpeed = vs * 0.015 * (1 / (safeR + 0.005) - 3);
+
+    // Axial velocity: toward midplane, stronger far from center
     const axialDir = -Math.sign(y);
-    const axialSpeed = vortexStr * 0.01 / (1 + Math.abs(y) * 2);
+    const axialSpeed = vs * 0.4 / (1 + Math.abs(y) * 3);
 
-    const turbX = Math.sin(seeds[i] + timeAccum * 2) * 0.003;
-    const turbZ = Math.cos(seeds[i] + timeAccum * 2.3) * 0.003;
-    const turbY = Math.sin(seeds[i] + timeAccum * 1.7) * 0.002;
+    // Turbulence (pseudo-random but continuous)
+    const turbX = Math.sin(seeds[i] + timeAccum * 2.0 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.5) * 0.5) * 0.002;
+    const turbZ = Math.cos(seeds[i] + timeAccum * 2.3 + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * 0.002;
+    const turbY = Math.sin(seeds[i] + timeAccum * 1.7 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * 0.0015;
 
-    positions[idx] += (radialDirX * radialSpeed + turbX) * delta * 60;
-    positions[idx + 1] += (axialDir * axialSpeed + turbY) * delta * 60;
-    positions[idx + 2] += (radialDirZ * radialSpeed + turbZ) * delta * 60;
+    // Apply radial inflow
+    const nx = x + (radialSpeed * (-x / safeR)) * dt;
+    const nz = z + (radialSpeed * (-z / safeR)) * dt;
+
+    // Apply angular rotation around Y axis
+    const newTheta = Math.atan2(nz, nx) + angSpeed * dt;
+    const newR = Math.sqrt(nx * nx + nz * nz);
+    const rx = newR * Math.cos(newTheta);
+    const rz = newR * Math.sin(newTheta);
+
+    positions[idx] = rx + turbX * dt;
+    positions[idx + 1] = y + (axialDir * axialSpeed + turbY) * dt;
+    positions[idx + 2] = rz + turbZ * dt;
 
     lifetimes[i] -= delta;
   }
 
   geometry.attributes.position.needsUpdate = true;
 
-  // Particle color shifts with vortex strength
-  const hue = 0.55 - state.vortexStability * 0.1;
-  const sat = 0.5 + state.vortexStability * 0.4;
-  const light = 0.4 + state.vortexStability * 0.3;
-  material.color.setHSL(hue, sat, light);
-  material.opacity = 0.2 + state.vortexStability * 0.5;
-  material.size = 0.005 + state.vortexStability * 0.008;
+  // Particle appearance scales with vortex state
+  const hue = 0.55 - vs * 0.12;
+  const sat = 0.4 + vs * 0.5;
+  const lit = 0.3 + vs * 0.5;
+  material.color.setHSL(hue, sat, lit);
+  material.opacity = 0.15 + vs * 0.6;
+  material.size = 0.004 + vs * 0.009;
 }
 
-export function burstParticles(count = 200) {
-  for (let i = 0; i < Math.min(count, PHYS.PARTICLE_COUNT); i++) {
-    const idx = Math.floor(Math.random() * PHYS.PARTICLE_COUNT) * 3;
+export function burstParticles(count) {
+  const n = Math.min(count || 300, COUNT);
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(Math.random() * COUNT) * 3;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.random() * Math.PI;
-    const speed = 0.05 + Math.random() * 0.1;
+    const speed = 0.03 + Math.random() * 0.08;
     positions[idx] = speed * Math.sin(phi) * Math.cos(theta);
     positions[idx + 1] = speed * Math.cos(phi);
     positions[idx + 2] = speed * Math.sin(phi) * Math.sin(theta);
-    lifetimes[idx / 3] = 0.3 + Math.random() * 0.5;
+    lifetimes[idx / 3] = 0.3 + Math.random() * 0.6;
   }
 }

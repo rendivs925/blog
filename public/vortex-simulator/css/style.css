@@ -196,9 +196,20 @@ input[type="range"]::-moz-range-thumb {
   letter-spacing: 2px;
 }
 
+.status-idle { color: #6688aa; }
 .status-off { color: #666; }
 .status-warn { color: #ff8844; }
 .status-ok { color: #44ff88; }
+.status-ok,
+.status-warn,
+.status-off,
+.status-idle {
+  transition: color 0.3s ease;
+}
+
+.hud-val {
+  transition: color 0.2s ease;
+}
 
 /* Responsive */
 @media (max-width: 600px) {
