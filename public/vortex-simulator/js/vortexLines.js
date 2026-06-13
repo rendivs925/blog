@@ -61,31 +61,28 @@ export function buildVortex(scene) {
   initialized = true;
 }
 
-export function updateVortex(time) {
+export function updateVortex(time, delta) {
   if (!initialized) return;
 
   const vs = state.vortexStability;
   const be = state.backEmf;
   const circ = state.vortexCirculation;
 
-  // GAN pulse flash — abrupt snap
   const pulseFlash = state.pulseSnap * 0.5;
 
-  // Back-EMF shimmer — vortex reacts to energy extraction
   const shimmerFreq = 25 + be * 20;
   const shimmer = be * 0.15 * Math.sin(time * shimmerFreq + state.rpmSmooth * 0.003);
 
-  // Circulation determines brightness and opacity
-  const circNorm = Math.min(1, circ / 50);
+  const circNorm = Math.min(1, circ / 150);
   const opacity = Math.min(1, 0.05 + circNorm * 0.65 + pulseFlash * 0.35);
   const bright = 0.3 + circNorm * 0.6 + pulseFlash * 0.4;
 
-  // Color shifts with circulation strength
   const hue = 0.58 - circNorm * 0.06 - be * 0.02;
 
+  const dt = delta || 0.016;
   const rotSpeed = state.omega * 0.15 * vs;
-  funnelTop.rotation.y += (rotSpeed + shimmer * 0.5) * 0.016;
-  funnelBot.rotation.y -= (rotSpeed - shimmer * 0.5) * 0.016;
+  funnelTop.rotation.y += (rotSpeed + shimmer * 0.5) * dt;
+  funnelBot.rotation.y -= (rotSpeed - shimmer * 0.5) * dt;
 
   funnelTop.material.opacity = opacity;
   funnelBot.material.opacity = opacity * 0.6;

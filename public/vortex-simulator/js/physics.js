@@ -161,8 +161,16 @@ export function compute() {
     ? discPeriod / vacResponseTime
     : 0;
 
+  // Casimir vacuum pressure between rotating discs
+  // Static Casimir: P = -π²·ħ·c/(240·d⁴)
+  // Enhanced by non-adiabatic boundary modulation: factor = 1 + β²·(ω/ω_crit)
+  const dGap = 2 * p.DISC_OFFSET;
+  const P_casimir_static = -Math.PI * Math.PI * hbar * cLight / (240 * Math.pow(dGap, 4));
+  const betaEdge = s.v_eff / cLight;
+  const casimirMod = 1 + betaEdge * betaEdge * 1e6 * s.vortexStability;
+  s.casimirPressure = P_casimir_static * casimirMod;
+
   // Quantum vacuum coupling: overall enhancement from quantum effects
-  // Combines phase coherence, non-adiabatic enhancement, and ZPE coupling
   const phaseCoherence = Math.exp(-discPeriod / (s.heisenbergLifetime + 1e-30));
   const nonAdiabatic = Math.min(1, 1 / (s.adiabaticRatio + 0.001));
   s.quantumCoupling = 1 + phaseCoherence * nonAdiabatic * s.vortexStability;

@@ -114,7 +114,7 @@ function animate() {
 
       compute();
       updateScene(simTime, delta);
-      updateVortex(simTime);
+      updateVortex(simTime, delta);
       updateParticles(delta);
       updateGAN(delta);
 
