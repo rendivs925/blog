@@ -9,6 +9,7 @@ export const state = {
   magnetStrength: 1.0,
 
   omega: 0,
+  omegaActual: 0,
   B_eff: 0,
   deltaP: 0,
   v_eff: 0,
@@ -61,8 +62,11 @@ export const state = {
 export function compute() {
   const s = state;
   const p = PHYS;
-  const omega = 2 * Math.PI * s.RPM / 60;
-  s.omega = omega;
+  const targetOmega = 2 * Math.PI * s.RPM / 60;
+  // Rotational inertia: first-order lag with 0.4s time constant
+  // I_eff = 0.013 kg·m² (two 0.15m Al discs), τ = I / C_damping ≈ 0.4s
+  s.omegaActual += (targetOmega - s.omegaActual) * 0.016 / p.DISC_INERTIA_TC;
+  s.omega = s.omegaActual;
 
   s.B_eff = s.magnetStrength * p.B_REM * (1 + 0.01 * s.HV_kV / 50);
 

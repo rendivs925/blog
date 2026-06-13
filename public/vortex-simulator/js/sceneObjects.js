@@ -394,7 +394,7 @@ export function buildScene(scene) {
 export function updateScene(time, delta) {
   if (!initialized) return;
 
-  const visRPM = Math.min(state.RPM, 3000);
+  const visRPM = Math.min(state.omegaActual * 60 / (2 * Math.PI), 3000);
   const visOmega = 2 * Math.PI * visRPM / 60;
   topDisc.rotation.y += visOmega * delta;
   bottomDisc.rotation.y -= visOmega * delta;
