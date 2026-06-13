@@ -3,6 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { PHYS } from './constants.js';
 import { state, compute, getStatus } from './physics.js';
@@ -24,14 +26,14 @@ scene.background = new THREE.Color(0x08080e);
 const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 10);
 camera.position.set(0.45, 0.28, 0.45);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
 renderer.setSize(w, h);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 container.appendChild(renderer.domElement);
 
-// Realistic environment reflections for metal surfaces
+// Environment: higher quality procedural studio lighting
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
 pmrem.dispose();
@@ -43,14 +45,19 @@ controls.target.set(0, 0, 0);
 controls.minDistance = 0.2;
 controls.maxDistance = 1.8;
 
+// Post-processing
 const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-composer.addPass(renderPass);
+composer.addPass(new RenderPass(scene, camera));
+
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(w, h),
   0.1, 0.3, 0.2
 );
 composer.addPass(bloomPass);
+
+const fxaaPass = new ShaderPass(FXAAShader);
+fxaaPass.uniforms['resolution'].value.set(1 / w, 1 / h);
+composer.addPass(fxaaPass);
 
 // Lighting
 const ambient = new THREE.AmbientLight(0x304060, 0.8);
@@ -102,7 +109,7 @@ function animate() {
       simTime += delta;
 
       compute();
-      updateScene(simTime);
+      updateScene(simTime, delta);
       updateVortex(simTime);
       updateParticles(delta);
       updatePulse(simTime);
@@ -137,4 +144,5 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(w2, h2);
   composer.setSize(w2, h2);
+  fxaaPass.uniforms['resolution'].value.set(1 / w2, 1 / h2);
 });

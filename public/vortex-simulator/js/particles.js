@@ -76,12 +76,17 @@ export function updateParticles(delta) {
   const sh = PHYS.PARTICLE_SPAWN_HEIGHT;
   const coreR = 0.003;
 
-  // Pulse: outward burst then inward rush
-  // The DCE pulse creates a void (outward) then vacuum rushes in (inward)
   const pulseOut = pulseActive ? Math.sin(pulsePhase * Math.PI) : 0;
   const pulseIn = pulseActive ? Math.sin(pulsePhase * Math.PI * 2) * (1 - pulsePhase) * 0.5 : 0;
-  // PulseKick combines both: early phase = outward, late phase = enhanced inward
   const pulseKick = pulseOut * 0.004 - pulseIn * 0.006;
+
+  const circNorm = Math.min(1, circ / 50);
+
+  // Pre-compute turbulence phases (saves inner-loop trig)
+  const turbPhaseX = timeAccum * (2.0 + be * 1.5);
+  const turbPhaseZ = timeAccum * (2.3 + be * 1.5);
+  const turbPhaseY = timeAccum * (1.7 + be * 1.2);
+  const turbAmp = (1 + be * 3) * vs * 0.002;
 
   for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
@@ -114,44 +119,35 @@ export function updateParticles(delta) {
 
     const safeR = Math.max(r, coreR);
 
-    // Circulation-driven inflow
-    const circNorm = Math.min(1, circ / 50);
     const radialSpeed = circNorm * 0.0012 / (safeR + 0.005);
-
-    // Net radial: inward spiral + pulse kick (pos = inward, neg = outward)
     const netRadial = Math.max(0, radialSpeed - pulseKick);
 
     const angSpeed = vs * 0.25 * (1 / (safeR + 0.005) - 3);
-
     const axialDir = -Math.sign(y);
     const axialSpeed = vs * 0.006 / (1 + Math.abs(y) * 3);
 
-    // Back-EMF amplifies turbulence
-    const turbAmp = (1 + be * 3) * vs * 0.002;
-    const turbX = Math.sin(seeds[i] + timeAccum * (2.0 + be * 1.5) + Math.sin(seeds[i] * 0.1 + timeAccum * 0.5) * 0.5) * turbAmp;
-    const turbZ = Math.cos(seeds[i] + timeAccum * (2.3 + be * 1.5) + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * turbAmp;
-    const turbY = Math.sin(seeds[i] + timeAccum * (1.7 + be * 1.2) + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * turbAmp * 0.75;
+    // Turbulence: simplified from 9 to 3 trig calls per particle
+    const s = seeds[i];
+    const turbX = Math.sin(s * 0.3 + turbPhaseX) * turbAmp;
+    const turbZ = Math.cos(s * 0.3 + turbPhaseZ) * turbAmp;
+    const turbY = Math.sin(s * 0.5 + turbPhaseY) * turbAmp * 0.75;
 
-    // Apply motion
     const nx = x + (netRadial * (-x / safeR) + turbX) * dt;
     const nz = z + (netRadial * (-z / safeR) + turbZ) * dt;
 
     const newTheta = Math.atan2(nz, nx) + angSpeed * dt;
     const newR = Math.sqrt(nx * nx + nz * nz);
-    const rx = newR * Math.cos(newTheta);
-    const rz = newR * Math.sin(newTheta);
 
-    positions[idx] = rx;
+    positions[idx] = newR * Math.cos(newTheta);
     positions[idx + 1] = y + (axialDir * axialSpeed + turbY) * dt;
-    positions[idx + 2] = rz;
+    positions[idx + 2] = newR * Math.sin(newTheta);
 
     lifetimes[i] -= delta;
   }
 
   geometry.attributes.position.needsUpdate = true;
 
-  // Color shifts with circulation
-  const hue = 0.58 - Math.min(1, circ / 50) * 0.1 - be * 0.03;
+  const hue = 0.58 - circNorm * 0.1 - be * 0.03;
   material.color.setHSL(hue, 0.3 + vs * 0.4, 0.4 + vs * 0.5);
   material.opacity = Math.min(1, 0.15 + vs * 0.55 + be * 0.1);
 }

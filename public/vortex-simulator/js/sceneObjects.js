@@ -132,13 +132,13 @@ export function buildScene(scene) {
   initialized = true;
 }
 
-export function updateScene(time) {
+export function updateScene(time, delta) {
   if (!initialized) return;
 
   const visRPM = Math.min(state.RPM, 3000);
   const visOmega = 2 * Math.PI * visRPM / 60;
-  topDisc.rotation.y += visOmega * 0.016;
-  bottomDisc.rotation.y -= visOmega * 0.016;
+  topDisc.rotation.y += visOmega * delta;
+  bottomDisc.rotation.y -= visOmega * delta;
 
   const vs = state.vortexStability;
   const be = state.backEmf;
