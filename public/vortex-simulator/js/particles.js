@@ -55,18 +55,6 @@ export function buildParticles(scene) {
   initialized = true;
 }
 
-const STAGE_HUES = [0.60, 0.35, 0.40, 0.55, 0.50, 0.55, 0.72, 0.30, 0.70, 0.08, 0.60, 0.50];
-const STAGE_COLS = new Float32Array(12);
-{
-  const tmp = new THREE.Color();
-  for (let si = 0; si < 4; si++) {
-    tmp.setHSL(STAGE_HUES[si * 3], STAGE_HUES[si * 3 + 1], STAGE_HUES[si * 3 + 2]);
-    STAGE_COLS[si * 3] = tmp.r;
-    STAGE_COLS[si * 3 + 1] = tmp.g;
-    STAGE_COLS[si * 3 + 2] = tmp.b;
-  }
-}
-
 function seedParticle(i, initial) {
   const idx = i * 3;
   const theta = Math.random() * Math.PI * 2;
@@ -80,12 +68,6 @@ function seedParticle(i, initial) {
   velocities[idx] = 0;
   velocities[idx + 1] = 0;
   velocities[idx + 2] = 0;
-
-  // Initialize color to inflow stage (blue) so particles are never black
-  const tmp = new THREE.Color().setHSL(STAGE_HUES[0], STAGE_HUES[1], STAGE_HUES[2]);
-  colors[idx] = tmp.r;
-  colors[idx + 1] = tmp.g;
-  colors[idx + 2] = tmp.b;
 
   lifetimes[i] = (initial ? 3.0 : PHYS.PARTICLE_LIFETIME) * (0.5 + Math.random() * 0.5);
 }
@@ -110,6 +92,22 @@ export function updateParticles(delta) {
 
   const pulseBurst = pa && ganTrans > 0.5 ? 0.02 : 0;
   const pulseInrush = pa && pulseSnap < 0.3 ? 0.005 : 0;
+
+  // Pre-compute stage colors for chain reaction visibility
+  const stageColData = [
+    [0.60, 0.35, 0.40],  // inflow: blue
+    [0.55, 0.50, 0.55],  // circ:  cyan
+    [0.72, 0.30, 0.70],  // core:  violet-white
+    [0.08, 0.60, 0.50],  // eject: orange
+  ];
+  const stageCols = new Float32Array(12);
+  const tmpCol = new THREE.Color();
+  for (let si = 0; si < 4; si++) {
+    tmpCol.setHSL(stageColData[si][0], stageColData[si][1], stageColData[si][2]);
+    stageCols[si * 3] = tmpCol.r;
+    stageCols[si * 3 + 1] = tmpCol.g;
+    stageCols[si * 3 + 2] = tmpCol.b;
+  }
 
   for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
@@ -205,10 +203,10 @@ export function updateParticles(delta) {
     else stage = 3;
     stages[i] = stage;
 
-    // Stage-based color from pre-computed STAGE_COLS (set once at module init)
-    colors[idx] = STAGE_COLS[stage * 3];
-    colors[idx + 1] = STAGE_COLS[stage * 3 + 1];
-    colors[idx + 2] = STAGE_COLS[stage * 3 + 2];
+    // Stage-based color (inflow→circ→core→eject)
+    colors[idx] = stageCols[stage * 3];
+    colors[idx + 1] = stageCols[stage * 3 + 1];
+    colors[idx + 2] = stageCols[stage * 3 + 2];
 
     lifetimes[i] -= delta;
   }
