@@ -42,6 +42,8 @@ export const PHYS = {
   PARTICLE_LIFETIME: 3.0,
 
   MU0: 4 * Math.PI * 1e-7,
+  EPSILON_0: 8.854e-12,
+  PARAM_GAIN_MAX: 3,
 
   // Detailed coil winding
   COIL_TURNS: 18,

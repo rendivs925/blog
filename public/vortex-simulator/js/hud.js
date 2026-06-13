@@ -24,6 +24,10 @@ export function updateHUD() {
   document.getElementById('hud-circulation').textContent = fmt(state.vortexCirculation, 1) + ' m²/s';
   document.getElementById('hud-gradient').textContent = fmt(state.pressureGradient, 0) + ' Pa/m';
 
+  // Physics coupling metrics
+  document.getElementById('hud-param').textContent = fmt(state.parametricGain, 2) + 'x';
+  document.getElementById('hud-hv').textContent = fmt(state.hvCoupling, 1);
+
   // Energy
   const P_in = state.P_motor + state.P_HV;
   document.getElementById('hud-input').textContent = fmt(P_in, 1) + ' W';

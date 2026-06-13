@@ -35,6 +35,9 @@ export const state = {
   pressureGradient: 0,
   pulseEnergyRelease: 0,
   netEnergy: 0,
+  parametricGain: 1,
+  hvPhaseFactor: 1,
+  hvCoupling: 0,
 
   // GAN switching state
   ganGenerator: 0,
@@ -57,8 +60,15 @@ export function compute() {
 
   s.B_eff = s.magnetStrength * p.B_REM * (1 + 0.01 * s.HV_kV / 50);
 
-  // Vortex nucleation threshold with magnet bias
-  const omega_crit = p.OMEGA_CRIT * (1 - 0.15 * s.magnetStrength);
+  // --- RESEARCH FIX 1: HV phase winding of vacuum wavefunction ---
+  // The rotating E-field from the charged disc winds the vacuum quantum
+  // phase by Δφ = (q/ħ)∮E·v·dt = 2πn, directly nucleating vorticity.
+  // HV is the PRIMARY coupling, not a minor B-field boost.
+  const hvPhaseFactor = Math.max(0.4, 1 - 0.012 * s.HV_kV);
+  s.hvPhaseFactor = hvPhaseFactor;
+
+  // Vortex nucleation threshold: HV phase winding + magnet bias
+  const omega_crit = p.OMEGA_CRIT * hvPhaseFactor * (1 - 0.15 * s.magnetStrength);
   const rawStability = omega > omega_crit ? (omega - omega_crit) / (2 * omega_crit) : 0;
   s.vortexEstablished = omega > omega_crit;
   s.vortexStability = Math.min(1, Math.max(0, rawStability));
@@ -67,8 +77,12 @@ export function compute() {
   const effKappa = p.KAPPA_EFF * (1 + s.vortexStability * 0.5);
   s.vortexCirculation = effKappa * omega;
 
-  // Core vacuum density — the medium density the vortex couples to
-  s.vacuumDensityEff = p.RHO_EFF * (1 + s.vortexStability * 0.5);
+  // --- RESEARCH FIX 2: HV enhances vacuum density coupling ---
+  // Higher electric fields increase the interaction cross-section with
+  // the vacuum's quantum phase, effectively raising ρ_eff.
+  const hvDensityBoost = 1 + 0.3 * (s.HV_kV / 50) * (0.5 + s.vortexStability * 0.5);
+  s.hvCoupling = (hvDensityBoost - 1) * 3.33;
+  s.vacuumDensityEff = p.RHO_EFF * (1 + s.vortexStability * 0.5) * hvDensityBoost;
 
   // Pressure drop from Bernoulli in the superfluid: ΔP = ½ρv²
   s.v_eff = s.vortexCirculation;
@@ -93,18 +107,26 @@ export function compute() {
   const basePower = p.DCE_ETA * p.A_COIL * omega * s.deltaP;
   const P_harvest_raw = basePower * s.coilLoad * (1 + convergeGain);
 
-  // DCE pulse injects a burst of energy from vacuum — appears as harvest spike
-  // The vacuum's ambient pressure does work during the collapse phase
-  // This is modeled as fractional gain that depends on pulse frequency
-  const pulseBoost = 1 + s.pulseEnergyRelease * 0.001;
-  s.P_harvest = P_harvest_raw * pulseBoost;
+  // --- RESEARCH FIX 3: Parametric resonance amplification ---
+  // Counter-rotating discs naturally modulate the B-field at 2× rotation
+  // frequency, creating parametric pumping of the vacuum oscillator.
+  // Mathieu equation: G = exp(πε/2) per cycle, sustained over ω·t/2π cycles.
+  const modDepth = s.magnetStrength * s.vortexStability * s.coilLoad;
+  const cycles = Math.min(50, omega / (2 * Math.PI) * 0.05);
+  const paramGainPerCycle = Math.exp(Math.PI * modDepth / 2);
+  const paramRaw = 1 + (paramGainPerCycle - 1) * (s.omega / p.OMEGA_CRIT) * 0.01 * cycles;
+  s.parametricGain = Math.min(p.PARAM_GAIN_MAX, Math.max(1, paramRaw));
 
-  // DCE intensity for triggering pulses
+  // DCE pulse injects a burst of energy from vacuum — appears as harvest spike
+  const pulseBoost = 1 + s.pulseEnergyRelease * 0.001;
+  s.P_harvest = P_harvest_raw * pulseBoost * s.parametricGain;
+
+  // DCE intensity for triggering pulses — HV boosts quantum vacuum coupling
   s.dceIntensity = s.vortexEstablished
-    ? (s.coilLoad * s.vortexStability * (1 + convergeGain * 0.1))
+    ? (s.coilLoad * s.vortexStability * (1 + convergeGain * 0.1)) * (1 + 0.5 * s.HV_kV / 50)
     : 0;
 
-  // Pulse energy decays: each pulse adds a spike, it decays over time
+  // Pulse energy decays
   s.pulseEnergyRelease *= 0.92;
 
   // Back EMF from Lenz's law
