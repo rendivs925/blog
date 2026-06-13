@@ -66,10 +66,17 @@ export function updateParticles(delta) {
   timeAccum += delta;
 
   const vs = state.vortexStability;
+  const be = state.backEmf;
+  const pulseActive = state.pulseActive;
+  const pulsePhase = state.pulsePhase;
+
   const dt = delta * 60;
   const sr = PHYS.PARTICLE_SPAWN_RADIUS;
   const sh = PHYS.PARTICLE_SPAWN_HEIGHT;
   const coreR = 0.003;
+
+  // Pulse shockwave: outward radial impulse that evolves over pulse lifetime
+  const pulseKickStr = pulseActive ? Math.sin(pulsePhase * Math.PI) : 0;
 
   for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
@@ -98,46 +105,53 @@ export function updateParticles(delta) {
       continue;
     }
 
-    if (r < 0.001) {
-      lifetimes[i] = 0;
-      continue;
-    }
+    if (r < 0.001) { lifetimes[i] = 0; continue; }
 
     const safeR = Math.max(r, coreR);
 
+    // Inward spiral — base flow
     const radialSpeed = vs * 0.0009 / (safeR + 0.005);
+
+    // Pulse kick pushes particles outward from center
+    const pulseRadial = pulseKickStr * 0.004 / (safeR + 0.001);
 
     const angSpeed = vs * 0.25 * (1 / (safeR + 0.005) - 3);
 
     const axialDir = -Math.sign(y);
     const axialSpeed = vs * 0.006 / (1 + Math.abs(y) * 3);
 
-    const amp = vs * 0.002;
-    const turbX = Math.sin(seeds[i] + timeAccum * 2.0 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.5) * 0.5) * amp;
-    const turbZ = Math.cos(seeds[i] + timeAccum * 2.3 + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * amp;
-    const turbY = Math.sin(seeds[i] + timeAccum * 1.7 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * amp * 0.75;
+    // Back-EMF amplifies turbulence
+    const turbAmp = (1 + be * 3) * vs * 0.002;
+    const turbX = Math.sin(seeds[i] + timeAccum * (2.0 + be * 1.5) + Math.sin(seeds[i] * 0.1 + timeAccum * 0.5) * 0.5) * turbAmp;
+    const turbZ = Math.cos(seeds[i] + timeAccum * (2.3 + be * 1.5) + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * turbAmp;
+    const turbY = Math.sin(seeds[i] + timeAccum * (1.7 + be * 1.2) + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * turbAmp * 0.75;
 
-    const nx = x + (radialSpeed * (-x / safeR)) * dt;
-    const nz = z + (radialSpeed * (-z / safeR)) * dt;
+    // Pulse vertical scatter
+    const pulseY = pulseKickStr * 0.003 * Math.sin(seeds[i] * 10);
+
+    // Apply motion
+    const netRadial = radialSpeed - pulseRadial; // pulse opposes inward spiral
+    const nx = x + (netRadial * (-x / safeR) + turbX) * dt;
+    const nz = z + (netRadial * (-z / safeR) + turbZ) * dt;
 
     const newTheta = Math.atan2(nz, nx) + angSpeed * dt;
     const newR = Math.sqrt(nx * nx + nz * nz);
     const rx = newR * Math.cos(newTheta);
     const rz = newR * Math.sin(newTheta);
 
-    positions[idx] = rx + turbX * dt;
-    positions[idx + 1] = y + (axialDir * axialSpeed + turbY) * dt;
-    positions[idx + 2] = rz + turbZ * dt;
+    positions[idx] = rx;
+    positions[idx + 1] = y + (axialDir * axialSpeed + turbY + pulseY) * dt;
+    positions[idx + 2] = rz;
 
     lifetimes[i] -= delta;
   }
 
   geometry.attributes.position.needsUpdate = true;
 
-  // Particle appearance
-  const hue = 0.58 - vs * 0.1;
+  // Particle color: shifts with back-EMF too
+  const hue = 0.58 - vs * 0.1 - be * 0.03;
   material.color.setHSL(hue, 0.3 + vs * 0.4, 0.4 + vs * 0.5);
-  material.opacity = 0.15 + vs * 0.55;
+  material.opacity = Math.min(1, 0.15 + vs * 0.55 + be * 0.1);
 }
 
 export function burstParticles(count) {
@@ -146,7 +160,7 @@ export function burstParticles(count) {
     const idx = Math.floor(Math.random() * COUNT) * 3;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.random() * Math.PI;
-    const speed = 0.03 + Math.random() * 0.08;
+    const speed = 0.03 + Math.random() * 0.1;
     positions[idx] = speed * Math.sin(phi) * Math.cos(theta);
     positions[idx + 1] = speed * Math.cos(phi);
     positions[idx + 2] = speed * Math.sin(phi) * Math.sin(theta);

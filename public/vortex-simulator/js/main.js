@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { PHYS } from './constants.js';
 import { state, compute, getStatus } from './physics.js';
 import { buildScene, updateScene } from './sceneObjects.js';
@@ -30,6 +31,11 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 container.appendChild(renderer.domElement);
 
+// Realistic environment reflections for metal surfaces
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
+pmrem.dispose();
+
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
@@ -37,7 +43,6 @@ controls.target.set(0, 0, 0);
 controls.minDistance = 0.2;
 controls.maxDistance = 1.8;
 
-// Subtle bloom for scientific-visualization feel
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
@@ -70,7 +75,6 @@ buildParticles(scene);
 buildFields(scene);
 buildPulse(scene);
 
-// Setup controls after scene is ready
 setupControls(camera, controls);
 
 const statusEl = document.getElementById('status-text');
@@ -99,7 +103,7 @@ function animate() {
     updateParticles(delta);
     updatePulse();
 
-    if (perfCounter % 3 === 0) updateFields();
+    if (perfCounter % 2 === 0) updateFields(time);
 
     pulseTimer += delta;
     if (pulseTimer > PHYS.DCE_PULSE_INTERVAL) {

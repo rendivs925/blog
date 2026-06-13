@@ -19,9 +19,11 @@ export function buildVortex(scene) {
       const y = off * (1 - 2 * t);
       const radius = 0.003 + 0.027 * Math.pow(Math.abs(y) / off, 1.5);
       const twist = t * Math.PI * 4 + phase;
-      const x = radius * Math.cos(twist);
-      const z = radius * Math.sin(twist);
-      pts.push(new THREE.Vector3(x, y, z));
+      pts.push(new THREE.Vector3(
+        radius * Math.cos(twist),
+        y,
+        radius * Math.sin(twist)
+      ));
     }
     return new THREE.CatmullRomCurve3(pts);
   }
@@ -44,11 +46,14 @@ export function buildVortex(scene) {
     depthWrite: false,
   });
 
-  const tubeGeo1 = new THREE.TubeGeometry(curve1, segments, 0.003, 8, false);
-  const tubeGeo2 = new THREE.TubeGeometry(curve2, segments, 0.003, 8, false);
-
-  funnelTop = new THREE.Mesh(tubeGeo1, mat1);
-  funnelBot = new THREE.Mesh(tubeGeo2, mat2);
+  funnelTop = new THREE.Mesh(
+    new THREE.TubeGeometry(curve1, segments, 0.003, 8, false),
+    mat1
+  );
+  funnelBot = new THREE.Mesh(
+    new THREE.TubeGeometry(curve2, segments, 0.003, 8, false),
+    mat2
+  );
   group.add(funnelTop);
   group.add(funnelBot);
 
@@ -60,19 +65,33 @@ export function updateVortex(time) {
   if (!initialized) return;
 
   const vs = state.vortexStability;
-  const opacity = 0.05 + vs * 0.5;
-  const bright = 0.3 + vs * 0.6;
+  const be = state.backEmf;
+
+  // Pulse flash
+  const pulseFlash = state.pulseActive
+    ? Math.sin(state.pulsePhase * Math.PI) * 0.5
+    : 0;
+
+  // Back-EMF shimmer: vortex reacts to energy extraction
+  const shimmerFreq = 25 + be * 20;
+  const shimmer = be * 0.15 * Math.sin(time * shimmerFreq + state.rpmSmooth * 0.003);
+
+  // Opacity modulated by everything
+  const opacity = Math.min(1, 0.05 + vs * 0.5 + pulseFlash * 0.35);
+  const bright = 0.3 + vs * 0.6 + pulseFlash * 0.4;
 
   const rotSpeed = state.omega * 0.15 * vs;
-  funnelTop.rotation.y += rotSpeed * 0.016;
-  funnelBot.rotation.y -= rotSpeed * 0.016;
+  funnelTop.rotation.y += (rotSpeed + shimmer * 0.5) * 0.016;
+  funnelBot.rotation.y -= (rotSpeed - shimmer * 0.5) * 0.016;
 
   funnelTop.material.opacity = opacity;
   funnelBot.material.opacity = opacity * 0.6;
   funnelTop.material.color.setHSL(0.57 - vs * 0.05, 0.5, bright * 0.4);
   funnelBot.material.color.setHSL(0.54 - vs * 0.05, 0.6, bright * 0.3);
 
-  const scale = 0.3 + vs * 1.0;
-  funnelTop.scale.set(scale, 1, scale);
-  funnelBot.scale.set(scale, 1, scale);
+  // Scale pinch from back EMF — vortex compresses under load
+  const pinch = 1 - be * 0.15;
+  const scale = (0.3 + vs * 1.0) * pinch;
+  funnelTop.scale.set(scale, 1 + be * 0.05, scale);
+  funnelBot.scale.set(scale, 1 + be * 0.05, scale);
 }

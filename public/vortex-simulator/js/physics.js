@@ -21,6 +21,11 @@ export const state = {
   vortexStability: 0,
   steerForce: 0,
   dceIntensity: 0,
+
+  backEmf: 0,
+  pulseActive: false,
+  pulsePhase: 0,
+  rpmSmooth: 5000,
 };
 
 export function compute() {
@@ -62,6 +67,15 @@ export function compute() {
   s.dceIntensity = s.vortexEstablished
     ? (s.coilLoad * s.vortexStability * (1 + convergeGain * 0.1))
     : 0;
+
+  // Back EMF: Lenz's law reaction — energy extraction perturbs the vortex
+  const targetBackEmf = s.vortexEstablished
+    ? s.coilLoad * Math.min(1, s.P_harvest / 10000)
+    : 0;
+  s.backEmf += (targetBackEmf - s.backEmf) * 0.08;
+
+  // Smooth RPM for wave animations
+  s.rpmSmooth += (s.RPM - s.rpmSmooth) * 0.05;
 
   // Losses
   const P_bearing = p.C_BEARING * omega;
