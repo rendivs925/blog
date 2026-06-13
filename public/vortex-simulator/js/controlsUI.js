@@ -33,33 +33,41 @@ export function setupControls(camera, controls) {
 
   const setView = (pos) => {
     if (pos === 'top') {
-      camera.position.set(0, 0.8, 0.001);
+      camera.position.set(0, 0.7, 0.001);
       controls.target.set(0, 0, 0);
     } else if (pos === 'side') {
-      camera.position.set(0.6, 0, 0);
+      camera.position.set(0.55, 0, 0);
       controls.target.set(0, 0, 0);
     } else {
-      camera.position.set(0.5, 0.3, 0.5);
+      camera.position.set(0.45, 0.28, 0.45);
       controls.target.set(0, 0, 0);
     }
     controls.update();
   };
 
-  document.getElementById('btn-top').addEventListener('click', () => setView('top'));
-  document.getElementById('btn-side').addEventListener('click', () => setView('side'));
-  document.getElementById('btn-orbit').addEventListener('click', () => setView('orbit'));
+  const buttons = ['btn-orbit', 'btn-top', 'btn-side'];
+  const views = ['orbit', 'top', 'side'];
+
+  buttons.forEach((id, i) => {
+    document.getElementById(id).addEventListener('click', () => {
+      buttons.forEach(b => document.getElementById(b).classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      setView(views[i]);
+    });
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === ' ' || e.key === 'p') {
+      e.preventDefault();
       paused = !paused;
-      document.getElementById('btn-play').textContent = paused ? '⏸ PAUSED' : '▶ RUN';
+      document.getElementById('btn-play').textContent = paused ? 'PAUSED' : 'RUN';
     }
     if (e.key === 'r') resetControls(camera, controls);
   });
 
   document.getElementById('btn-play').addEventListener('click', () => {
     paused = !paused;
-    document.getElementById('btn-play').textContent = paused ? '⏸ PAUSED' : '▶ RUN';
+    document.getElementById('btn-play').textContent = paused ? 'PAUSED' : 'RUN';
   });
 
   compute();
@@ -89,9 +97,13 @@ function resetControls(camera, controls) {
   v('val-steery').textContent = '0.00';
 
   paused = false;
-  v('btn-play').textContent = '▶ RUN';
+  v('btn-play').textContent = 'RUN';
 
-  camera.position.set(0.5, 0.3, 0.5);
+  document.getElementById('btn-orbit').classList.add('active');
+  document.getElementById('btn-top').classList.remove('active');
+  document.getElementById('btn-side').classList.remove('active');
+
+  camera.position.set(0.45, 0.28, 0.45);
   controls.target.set(0, 0, 0);
   controls.update();
 

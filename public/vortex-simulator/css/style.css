@@ -8,9 +8,12 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0a0a1a;
-  color: #c0d0ff;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  background: #08080e;
+  color: #b0b8c8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
 }
 
 #scene-container {
@@ -32,207 +35,220 @@ html, body {
   top: 16px;
   right: 16px;
   z-index: 10;
-  background: rgba(8, 8, 24, 0.88);
-  border: 1px solid rgba(0, 170, 255, 0.25);
-  border-radius: 10px;
-  padding: 14px 18px;
-  min-width: 180px;
-  backdrop-filter: blur(8px);
-}
-
-.hud-title {
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: #4488cc;
-  margin-bottom: 10px;
-  text-align: center;
-  border-bottom: 1px solid rgba(68, 136, 204, 0.2);
-  padding-bottom: 6px;
+  background: rgba(10, 10, 18, 0.85);
+  border: 1px solid rgba(100, 140, 200, 0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 160px;
+  backdrop-filter: blur(12px);
+  font-size: 12px;
+  user-select: none;
 }
 
 .hud-row {
   display: flex;
   justify-content: space-between;
-  padding: 2px 0;
-  font-size: 13px;
+  padding: 1px 0;
+  gap: 16px;
+}
+
+.hud-row.hud-tiny {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.hud-sep {
+  height: 1px;
+  background: rgba(100, 140, 200, 0.1);
+  margin: 4px 0;
 }
 
 .hud-label {
-  color: #6688aa;
+  color: #607080;
+  letter-spacing: 0.02em;
 }
 
 .hud-val {
-  color: #88ddff;
+  color: #a0c0e0;
   text-align: right;
-  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  min-width: 64px;
 }
 
 /* Controls panel bottom */
 #controls-panel {
   position: fixed;
-  bottom: 20px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  background: rgba(8, 8, 24, 0.9);
-  border: 1px solid rgba(0, 170, 255, 0.2);
-  border-radius: 12px;
-  padding: 14px 22px;
-  min-width: 500px;
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 18, 0.88);
+  border: 1px solid rgba(100, 140, 200, 0.12);
+  border-radius: 10px;
+  padding: 12px 20px;
+  min-width: 480px;
+  backdrop-filter: blur(12px);
+  user-select: none;
 }
 
 .controls-title {
   font-size: 10px;
-  letter-spacing: 3px;
-  color: #4488cc;
+  letter-spacing: 2px;
+  color: #506070;
   text-align: center;
   margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
-.controls-group {
+.controls-cols {
   display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
+  gap: 24px;
   justify-content: center;
+}
+
+.controls-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .control-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 140px;
 }
 
 .ctrl-label {
   font-size: 11px;
-  color: #6688aa;
-  min-width: 48px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  color: #607080;
+  min-width: 52px;
+  letter-spacing: 0.03em;
 }
 
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100px;
-  height: 4px;
-  background: linear-gradient(90deg, #224466, #4488cc);
+  width: 88px;
+  height: 3px;
+  background: #1a2530;
   border-radius: 2px;
   outline: none;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+input[type="range"]:hover {
+  background: #253040;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #00aaff;
-  border: 2px solid #004488;
+  background: #5080b0;
+  border: none;
   cursor: pointer;
-  transition: 0.1s;
+  transition: background 0.15s, transform 0.15s;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  background: #44ccff;
-  transform: scale(1.15);
+  background: #70a0d0;
+  transform: scale(1.2);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #00aaff;
-  border: 2px solid #004488;
+  background: #5080b0;
+  border: none;
   cursor: pointer;
 }
 
 .ctrl-val {
   font-size: 11px;
-  color: #88ddff;
-  min-width: 48px;
+  color: #80a0c0;
+  min-width: 44px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .controls-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .ctrl-btn {
-  background: rgba(0, 80, 160, 0.2);
-  border: 1px solid rgba(0, 170, 255, 0.3);
-  color: #88bbdd;
-  padding: 4px 12px;
-  border-radius: 6px;
+  background: transparent;
+  border: 1px solid rgba(100, 140, 200, 0.2);
+  color: #607080;
+  padding: 3px 10px;
+  border-radius: 5px;
   cursor: pointer;
   font-family: inherit;
   font-size: 11px;
-  letter-spacing: 1px;
-  transition: 0.15s;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .ctrl-btn:hover {
-  background: rgba(0, 120, 200, 0.3);
-  border-color: rgba(0, 170, 255, 0.6);
-  color: #ccddff;
+  background: rgba(80, 128, 176, 0.12);
+  border-color: rgba(100, 140, 200, 0.4);
+  color: #90a8c0;
 }
 
 .ctrl-btn.active {
-  background: rgba(0, 120, 200, 0.25);
-  border-color: #00aaff;
-  color: #00aaff;
+  background: rgba(80, 128, 176, 0.15);
+  border-color: #5080b0;
+  color: #80b0d8;
 }
 
-.controls-info {
-  text-align: center;
-  margin-top: 8px;
-  font-size: 11px;
-  letter-spacing: 2px;
+#status-text {
+  margin-left: 12px;
+  font-size: 10px;
+  letter-spacing: 1px;
 }
 
-.status-idle { color: #6688aa; }
-.status-off { color: #666; }
-.status-warn { color: #ff8844; }
-.status-ok { color: #44ff88; }
-.status-ok,
-.status-warn,
-.status-off,
-.status-idle {
-  transition: color 0.3s ease;
-}
+.status-idle { color: #506070; }
+.status-off { color: #404850; }
+.status-warn { color: #c08040; }
+.status-ok { color: #50a080; }
 
 .hud-val {
   transition: color 0.2s ease;
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   #controls-panel {
     min-width: unset;
-    width: calc(100% - 20px);
+    width: calc(100% - 16px);
     padding: 10px 14px;
-    bottom: 10px;
+    bottom: 8px;
   }
-  .control-row {
-    min-width: 100px;
+  .controls-cols {
+    gap: 12px;
+    flex-wrap: wrap;
   }
   input[type="range"] {
     width: 60px;
   }
   #hud {
-    font-size: 12px;
     min-width: 140px;
-    padding: 10px 14px;
+    padding: 10px 12px;
     top: 10px;
     right: 10px;
+    font-size: 11px;
   }
   .hud-row {
-    font-size: 11px;
+    gap: 8px;
+  }
+  .controls-title {
+    font-size: 9px;
   }
 }
