@@ -5,7 +5,6 @@ import { state } from './physics.js';
 const group = new THREE.Group();
 let topDisc, bottomDisc, wireGroup, coilGlow, liftArrow, core, coreFlash, membrane;
 let bFieldGlow, bFieldGlow2;
-let hvTipTop, hvTipBot;
 let initialized = false;
 
 export function buildScene(scene) {
@@ -326,37 +325,6 @@ export function buildScene(scene) {
     group.add(strut);
   }
 
-  // --- HV electrode tips ---
-  const hvMat = new THREE.MeshPhysicalMaterial({
-    color: 0x8888aa,
-    metalness: 0.7,
-    roughness: 0.15,
-  });
-  const tipGeo = new THREE.ConeGeometry(0.004, 0.012, 8);
-  hvTipTop = new THREE.Mesh(tipGeo, hvMat);
-  hvTipTop.position.y = off * 0.75;
-  group.add(hvTipTop);
-  hvTipBot = new THREE.Mesh(tipGeo.clone(), hvMat);
-  hvTipBot.position.y = -off * 0.75;
-  hvTipBot.rotation.x = Math.PI;
-  group.add(hvTipBot);
-
-  const coronaMat = new THREE.MeshBasicMaterial({
-    color: 0x6677cc,
-    transparent: true,
-    opacity: 0.06,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-  for (let sign = -1; sign <= 1; sign += 2) {
-    const corona = new THREE.Mesh(
-      new THREE.SphereGeometry(0.008, 12, 12),
-      coronaMat.clone()
-    );
-    corona.position.y = sign * off * 0.75;
-    group.add(corona);
-  }
-
   // --- Magnetic field halo rings ---
   const bFieldMat = new THREE.MeshBasicMaterial({
     color: 0x4488cc,
@@ -449,15 +417,6 @@ export function updateScene(time, delta) {
     }
   });
   coilGlow.intensity = powerRatio * 1.5 * emfFlicker;
-
-  // HV corona
-  const hvIntensity = (0.5 + 0.5 * Math.sin(time * 3 + state.HV_kV * 2)) * (state.HV_kV / 50) * 0.06;
-  group.children.forEach(child => {
-    if (child.isMesh && child.material && child.material.color &&
-        child.material.color.getHex() === 0x6677cc) {
-      child.material.opacity = hvIntensity;
-    }
-  });
 
   // B-field halo
   const bNorm = Math.min(1, state.B_eff / 2);

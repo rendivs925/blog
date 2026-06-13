@@ -29,21 +29,21 @@ export function buildParticles(scene) {
   canvas.height = 32;
   const ctx = canvas.getContext('2d');
   const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-  gradient.addColorStop(0, 'rgba(180, 210, 240, 0.6)');
-  gradient.addColorStop(0.5, 'rgba(140, 180, 220, 0.3)');
-  gradient.addColorStop(1, 'rgba(80, 120, 180, 0)');
+  gradient.addColorStop(0, 'rgba(220, 235, 255, 1)');
+  gradient.addColorStop(0.3, 'rgba(180, 210, 240, 0.5)');
+  gradient.addColorStop(1, 'rgba(100, 140, 200, 0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 32, 32);
   const texture = new THREE.CanvasTexture(canvas);
 
   material = new THREE.PointsMaterial({
-    size: 0.007,
+    size: 0.012,
     map: texture,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     transparent: true,
-    opacity: 0.35,
-    color: 0x7799bb,
+    opacity: 0.55,
+    color: 0x88bbee,
     sizeAttenuation: true,
   });
 
@@ -181,10 +181,10 @@ export function updateParticles(delta) {
   geometry.attributes.position.needsUpdate = true;
 
   const avgIntensity = Math.min(1, circNorm * 0.5 + genNorm * 0.2 + (pa ? 0.15 : 0));
-  const hue = 0.60 - avgIntensity * 0.08;
-  material.color.setHSL(hue, 0.2 + avgIntensity * 0.2, 0.3 + avgIntensity * 0.35);
-  material.opacity = Math.min(0.6, 0.08 + vs * 0.25 + be * 0.05 + genNorm * 0.1);
-  material.size = 0.005 + avgIntensity * 0.004;
+  const hue = 0.60 - avgIntensity * 0.10;
+  material.color.setHSL(hue, 0.3 + avgIntensity * 0.3, 0.4 + avgIntensity * 0.4);
+  material.opacity = Math.min(0.85, 0.15 + vs * 0.4 + be * 0.08 + genNorm * 0.15);
+  material.size = 0.008 + avgIntensity * 0.008;
 }
 
 export function burstParticles(count) {
