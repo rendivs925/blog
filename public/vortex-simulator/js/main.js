@@ -75,6 +75,11 @@ const rimLight = new THREE.DirectionalLight(0x80a0ff, 0.4);
 rimLight.position.set(0, -0.8, 0);
 scene.add(rimLight);
 
+// Ground grid for spatial reference
+const grid = new THREE.GridHelper(1.2, 12, 0x203040, 0x101a28);
+grid.position.y = -PHYS.DISC_OFFSET - 0.02;
+scene.add(grid);
+
 // Build systems
 buildScene(scene);
 buildVortex(scene);

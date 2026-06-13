@@ -14,7 +14,7 @@ export const PHYS = {
   A_COIL: 0.01,
   COIL_RADIUS: 0.08,
 
-  OMEGA_CRIT: 200,
+  OMEGA_CRIT: 400,
   RHO_EFF: 0.03,
   KAPPA_EFF: 0.15,
 
@@ -25,7 +25,7 @@ export const PHYS = {
   DCE_ETA: 0.85,
 
   C_BEARING: 0.01,
-  C_WINDAGE: 5e-5,
+  C_WINDAGE: 2e-6,
   C_MAG_DRAG: 1e-9,
   R_LEAKAGE: 1e9,
 

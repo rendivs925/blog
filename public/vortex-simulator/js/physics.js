@@ -139,7 +139,7 @@ export function compute() {
 
   // Losses
   const P_bearing = p.C_BEARING * omega;
-  const P_windage = p.C_WINDAGE * Math.pow(omega, 2.5);
+  const P_windage = p.C_WINDAGE * omega * omega * omega;
   const P_mag_drag = p.C_MAG_DRAG * s.B_eff * s.B_eff * Math.pow(omega, 2);
   s.P_loss = P_bearing + P_windage + P_mag_drag;
 
