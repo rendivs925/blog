@@ -3,7 +3,7 @@ import { PHYS } from './constants.js';
 import { state } from './physics.js';
 
 const group = new THREE.Group();
-let topDisc, bottomDisc, wireGroup, coilGlow, liftArrow, core, coreFlash, membrane;
+let topDisc, bottomDisc, wireGroup, coilGlow, core, coreFlash, membrane;
 let bFieldGlow, bFieldGlow2;
 let initialized = false;
 
@@ -379,14 +379,6 @@ export function buildScene(scene) {
   membrane.rotation.x = Math.PI / 2;
   group.add(membrane);
 
-  // --- Lift arrow ---
-  liftArrow = new THREE.ArrowHelper(
-    new THREE.Vector3(0, 1, 0),
-    new THREE.Vector3(0, -0.35, 0),
-    0.04, 0x50a080, 0.05, 0.025
-  );
-  group.add(liftArrow);
-
   scene.add(group);
   initialized = true;
 }
@@ -394,7 +386,7 @@ export function buildScene(scene) {
 export function updateScene(time, delta) {
   if (!initialized) return;
 
-  const visRPM = Math.min(state.omegaActual * 60 / (2 * Math.PI), 3000);
+  const visRPM = Math.min(state.RPM, 3000);
   const visOmega = 2 * Math.PI * visRPM / 60;
   topDisc.rotation.y += visOmega * delta;
   bottomDisc.rotation.y -= visOmega * delta;
@@ -426,11 +418,6 @@ export function updateScene(time, delta) {
   bFieldGlow.rotation.y = time * visOmega * 0.5;
   bFieldGlow2.material.opacity = (0.02 + bNorm * 0.06 * bPulse) * 0.5;
   bFieldGlow2.material.color.copy(bFieldGlow.material.color);
-
-  // Lift arrow
-  const liftMag = Math.min(state.F_lift / 50, 1);
-  liftArrow.setLength(0.04 + liftMag * 0.35, 0.05, 0.025);
-  liftArrow.setColor(new THREE.Color(0x50a080).lerp(new THREE.Color(0xc08040), liftMag));
 
   // --- GAN core ---
   const pa = state.pulseActive;
