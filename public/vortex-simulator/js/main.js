@@ -12,7 +12,7 @@ import { buildScene, updateScene } from './sceneObjects.js';
 import { buildVortex, updateVortex } from './vortexLines.js';
 import { buildParticles, updateParticles } from './particles.js';
 import { buildFields, updateFields } from './fields.js';
-import { buildPulse, updatePulse, checkAndTriggerPulse, updatePumpWave } from './dcePulse.js';
+import { buildPulse, updatePulse, updatePumpWave, updateGAN } from './dcePulse.js';
 import { updateHUD } from './hud.js';
 import { setupControls, isPaused } from './controlsUI.js';
 
@@ -89,7 +89,6 @@ statusEl.className = 'status-idle';
 
 const clock = new THREE.Clock();
 let simTime = 0;
-let pulseTimer = 0;
 let perfCounter = 0;
 
 function animate() {
@@ -113,14 +112,9 @@ function animate() {
       updateVortex(simTime);
       updateParticles(delta);
       updatePulse(simTime);
+      updateGAN(delta);
 
       if (perfCounter % 2 === 0) updateFields(simTime);
-
-      pulseTimer += delta;
-      if (pulseTimer > PHYS.DCE_PULSE_INTERVAL) {
-        checkAndTriggerPulse(simTime);
-        pulseTimer = 0;
-      }
 
       updatePumpWave();
       updateHUD();

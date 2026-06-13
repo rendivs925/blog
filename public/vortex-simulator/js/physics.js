@@ -26,6 +26,7 @@ export const state = {
   backEmf: 0,
   pulseActive: false,
   pulsePhase: 0,
+  pulseSnap: 0,
   rpmSmooth: 5000,
   timeScale: 1,
 
@@ -34,6 +35,18 @@ export const state = {
   pressureGradient: 0,
   pulseEnergyRelease: 0,
   netEnergy: 0,
+
+  // GAN switching state
+  ganGenerator: 0,
+  ganDiscriminator: 0,
+  ganPulseActive: false,
+  ganPhase: 0,
+  ganSlot: 0,
+  ganTransition: 0,
+
+  // discriminator membrane effect
+  ganMembraneStress: 0,
+  ganMembraneFlash: 0,
 };
 
 export function compute() {

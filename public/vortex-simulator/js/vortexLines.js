@@ -68,10 +68,8 @@ export function updateVortex(time) {
   const be = state.backEmf;
   const circ = state.vortexCirculation;
 
-  // Pulse flash
-  const pulseFlash = state.pulseActive
-    ? Math.sin(state.pulsePhase * Math.PI) * 0.5
-    : 0;
+  // GAN pulse flash — abrupt snap
+  const pulseFlash = state.pulseSnap * 0.5;
 
   // Back-EMF shimmer — vortex reacts to energy extraction
   const shimmerFreq = 25 + be * 20;

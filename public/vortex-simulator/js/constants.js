@@ -42,4 +42,21 @@ export const PHYS = {
   PARTICLE_LIFETIME: 3.0,
 
   MU0: 4 * Math.PI * 1e-7,
+
+  // Detailed coil winding
+  COIL_TURNS: 18,
+  COIL_LAYERS: 2,
+  WIRE_RADIUS: 0.0016,
+  WIRE_SPACING: 0.0036,
+
+  // GAN pulse switching
+  GAN_ACCUM_RATE: 3,
+  GAN_DISC_LEARN: 2.5,
+  GAN_PULSE_DURATION: 0.4,
+  GAN_NOISE: 0.25,
+
+  // Particles — full volume chain reaction
+  PARTICLE_COUNT: 15000,
+  PARTICLE_LIFETIME: 4.0,
+  PARTICLE_DRAG: 0.96,
 };

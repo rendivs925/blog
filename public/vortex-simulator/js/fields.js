@@ -38,6 +38,7 @@ export function updateFields(time) {
   const be = state.backEmf;
   const pulseActive = state.pulseActive;
   const pulsePhase = state.pulsePhase;
+  const pulseSnap = state.pulseSnap;
   const density = state.vacuumDensityEff;
 
   const imageData = ctx.createImageData(128, 128);
@@ -76,12 +77,11 @@ export function updateFields(time) {
       if (pulseActive) {
         const distToRing = Math.abs(r - shockRadius);
         if (distToRing < 5) {
-          const ringBright = (1 - distToRing / 5) * Math.sin(pulsePhase * Math.PI) * 2.5;
+          const ringBright = (1 - distToRing / 5) * pulseSnap * 2.5;
           intensity = Math.min(1, intensity + ringBright);
         }
-        // Secondary inward rush after wave passes
         if (r < shockRadius && r > 5) {
-          const inflow = pulsePhase * 0.3 * (1 - r / shockRadius);
+          const inflow = pulseSnap * 0.3 * (1 - r / shockRadius);
           intensity = Math.min(1, intensity + inflow * 0.4);
         }
       }
