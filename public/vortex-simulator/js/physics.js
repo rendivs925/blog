@@ -66,6 +66,7 @@ export function compute() {
   // Rotational inertia: first-order lag with 0.4s time constant
   // I_eff = 0.013 kg·m² (two 0.15m Al discs), τ = I / C_damping ≈ 0.4s
   s.omegaActual += (targetOmega - s.omegaActual) * 0.016 / p.DISC_INERTIA_TC;
+  if (!isFinite(s.omegaActual)) s.omegaActual = 0;
   s.omega = s.omegaActual;
 
   s.B_eff = s.magnetStrength * p.B_REM * (1 + 0.01 * s.HV_kV / 50);
