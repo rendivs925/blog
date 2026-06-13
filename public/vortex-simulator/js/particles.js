@@ -7,7 +7,7 @@ const positions = new Float32Array(COUNT * 3);
 const velocities = new Float32Array(COUNT * 3);
 const lifetimes = new Float32Array(COUNT);
 const seeds = new Float32Array(COUNT);
-const sizes = new Float32Array(COUNT);
+const radii0 = new Float32Array(COUNT);
 
 let points, geometry, material;
 let initialized = false;
@@ -20,7 +20,7 @@ export function buildParticles(scene) {
   for (let i = 0; i < COUNT; i++) {
     seedParticle(i, true);
     seeds[i] = Math.random() * 100;
-    sizes[i] = 0.003 + Math.random() * 0.004;
+    radii0[i] = Math.sqrt(Math.random()) * sr;
   }
 
   geometry = new THREE.BufferGeometry();
@@ -31,21 +31,21 @@ export function buildParticles(scene) {
   canvas.height = 32;
   const ctx = canvas.getContext('2d');
   const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-  gradient.addColorStop(0, 'rgba(220, 240, 255, 1)');
-  gradient.addColorStop(0.3, 'rgba(180, 215, 250, 0.7)');
-  gradient.addColorStop(1, 'rgba(120, 160, 220, 0)');
+  gradient.addColorStop(0, 'rgba(240, 248, 255, 1)');
+  gradient.addColorStop(0.2, 'rgba(200, 230, 255, 0.8)');
+  gradient.addColorStop(1, 'rgba(100, 150, 220, 0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 32, 32);
   const texture = new THREE.CanvasTexture(canvas);
 
   material = new THREE.PointsMaterial({
-    size: 0.008,
+    size: 0.01,
     map: texture,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     transparent: true,
-    opacity: 0.7,
-    color: 0xaaccee,
+    opacity: 0.8,
+    color: 0x88bbee,
     sizeAttenuation: true,
   });
 
@@ -57,38 +57,18 @@ export function buildParticles(scene) {
 function seedParticle(i, initial) {
   const idx = i * 3;
   const theta = Math.random() * Math.PI * 2;
-  const phi = Math.acos(2 * Math.random() - 1);
+  const r = Math.sqrt(Math.random()) * sr;
+  const y = (Math.random() - 0.5) * sh;
 
-  // Spread across full volume: some at outer, some mid, some core
-  const zone = Math.random();
-  let r, y;
-  if (zone < 0.35) {
-    // Outer inflow zone: large radius, moderate height
-    r = sr * (0.35 + Math.random() * 0.65);
-    y = (Math.random() - 0.5) * sh;
-  } else if (zone < 0.65) {
-    // Mid circulation zone
-    r = 0.06 + Math.random() * 0.14;
-    y = (Math.random() - 0.5) * sh * 0.6;
-  } else if (zone < 0.85) {
-    // Core region
-    r = Math.random() * 0.04;
-    y = (Math.random() - 0.5) * 0.04;
-  } else {
-    // Axial jets
-    r = Math.random() * 0.08;
-    y = (Math.random() > 0.5 ? 1 : -1) * (PHYS.DISC_OFFSET + Math.random() * 0.15);
-  }
-
-  positions[idx] = r * Math.sin(theta);
+  positions[idx] = r * Math.cos(theta);
   positions[idx + 1] = y;
-  positions[idx + 2] = r * Math.cos(theta);
+  positions[idx + 2] = r * Math.sin(theta);
 
-  velocities[idx] = (Math.random() - 0.5) * 0.002;
-  velocities[idx + 1] = (Math.random() - 0.5) * 0.001;
-  velocities[idx + 2] = (Math.random() - 0.5) * 0.002;
+  velocities[idx] = 0;
+  velocities[idx + 1] = 0;
+  velocities[idx + 2] = 0;
 
-  lifetimes[i] = (initial ? 1.0 : PHYS.PARTICLE_LIFETIME) * (0.5 + Math.random() * 0.5);
+  lifetimes[i] = (initial ? 2.0 : PHYS.PARTICLE_LIFETIME) * (0.5 + Math.random() * 0.5);
 }
 
 export function updateParticles(delta) {
@@ -98,23 +78,20 @@ export function updateParticles(delta) {
   const vs = state.vortexStability;
   const be = state.backEmf;
   const pa = state.pulseActive;
-  const pulsePhase = state.pulsePhase;
   const pulseSnap = state.pulseSnap;
   const circ = state.vortexCirculation;
-  const grad = state.pressureGradient;
   const gen = state.ganGenerator;
   const disc = state.ganDiscriminator;
   const ganTrans = state.ganTransition;
 
   const dt = delta * 60;
-  const coreR = 0.005;
+  const coreR = 0.006;
   const off = PHYS.DISC_OFFSET;
   const circNorm = Math.min(1, circ / 50);
   const genNorm = Math.min(1, gen / (disc + 0.01));
 
-  // Pulse shock — affects particles across all zones
-  const pulseKick = pa ? 0.008 * Math.sign(pulseSnap - 0.3) : 0;
   const pulseBurst = pa && ganTrans > 0.5 ? 0.02 : 0;
+  const pulseInrush = pa && pulseSnap < 0.3 ? 0.005 : 0;
 
   for (let i = 0; i < COUNT; i++) {
     const idx = i * 3;
@@ -132,85 +109,78 @@ export function updateParticles(delta) {
       continue;
     }
 
-    // Determine zone
-    const inOuter = r > 0.16;
-    const inMid = r > 0.04 && r <= 0.16;
-    const inCore = r <= 0.04 && absY < off * 0.5;
-    const inAxial = absY > off * 0.5 && r < 0.08;
+    const safeR = Math.max(r, coreR);
 
-    // --- Forces by zone ---
-    let ax = 0, ay = 0, az = 0;
+    // --- Superfluid vortex velocity field ---
+    // v_theta = Gamma / (2*pi*r)  — irrotational vortex (quantum vortex signature)
+    // v_r = -k_inflow / r         — Bernoulli pressure gradient inflow
+    // v_z = -k_axial * y          — axial convergence toward disc plane
 
-    // Outer zone: slow inward drift + vacuum fluctuations
-    if (inOuter) {
-      const inflow = circNorm * 0.0003 / (r + 0.01);
-      ax -= x * inflow / r;
-      az -= z * inflow / r;
-      // Vacuum density fluctuation
+    // Tangential velocity: the 1/r profile defines a quantum vortex
+    const vTheta = circNorm * 0.02 / (safeR + 0.003);
+
+    // Radial inflow: faster near core (Bernoulli pressure drop)
+    const vRadial = -circNorm * 0.004 / (safeR + 0.005);
+
+    // Axial convergence: particles flow toward z=0 (the disc plane)
+    const vAxial = -y * vs * 0.015;
+
+    // Convert to Cartesian
+    const cosT = x / safeR;
+    const sinT = z / safeR;
+    const vxTarget = -vTheta * sinT + vRadial * cosT;
+    const vzTarget = vTheta * cosT + vRadial * sinT;
+    const vyTarget = vAxial;
+
+    // Coupling strength: how quickly particles advect with the superfluid
+    // Higher coupling = tighter flow following, lower = more drift
+    const coupling = 0.12 * (1 + vs * 0.5);
+
+    ax = (vxTarget - vx) * coupling;
+    ay = (vyTarget - vy) * coupling;
+    az = (vzTarget - vz) * coupling;
+
+    // --- Superfluid quantum fluctuations (vacuum zero-point motion) ---
+    if (vs > 0.1) {
       const s = seeds[i];
-      const fluc = Math.sin(s * 0.2 + timeAccum * 0.5) * 0.0005 * vs;
-      ax += Math.sin(s * 0.5 + timeAccum) * fluc;
-      az += Math.cos(s * 0.5 + timeAccum * 1.1) * fluc;
-      ay += Math.sin(s * 0.3 + timeAccum * 0.7) * fluc * 0.5;
+      const flucAmp = 0.0003 * vs * (1 + be * 0.5);
+      const flucFreq = 1.5 + be * 1.0;
+      ax += Math.sin(s * 0.7 + timeAccum * flucFreq) * flucAmp;
+      ay += Math.cos(s * 1.1 + timeAccum * flucFreq * 0.8) * flucAmp * 0.6;
+      az += Math.sin(s * 0.9 + timeAccum * flucFreq * 1.2) * flucAmp;
     }
 
-    // Mid zone: circulation + angular momentum + radial inflow
-    if (inMid) {
-      const safeR = Math.max(r, 0.02);
-      const angSpeed = vs * 0.3 * (1 / (safeR + 0.01) - 2);
-      // Tangential acceleration
-      const tx = -z * angSpeed * 0.02;
-      const tz = x * angSpeed * 0.02;
-      ax += tx;
-      az += tz;
-      // Radial inflow (Bernoulli)
-      const inflow = circNorm * 0.002 / (safeR + 0.005);
-      ax -= x * inflow / safeR;
-      az -= z * inflow / safeR;
-      // Axial convergence
-      ay -= y * vs * 0.008;
+    // --- GAN pulse: outward shockwave then inward inrush ---
+    if (pulseBurst > 0.001 && safeR < 0.25) {
+      const push = pulseBurst * (1 - safeR / 0.25);
+      ax += x * push * 8;
+      az += z * push * 8;
+      ay += Math.sin(seeds[i] + timeAccum * 8) * push * 4;
+    }
+    if (pulseInrush > 0.001 && safeR > coreR * 2) {
+      const pull = pulseInrush / (safeR + 0.01);
+      ax -= x * pull;
+      az -= z * pull;
     }
 
-    // Core zone: chaotic acceleration + pulse effects
-    if (inCore) {
+    // --- Core chaos: quantum vortex core dynamics ---
+    if (r < coreR * 3 && vs > 0.3) {
       const s = seeds[i];
-      ax += Math.sin(s + timeAccum * 3 + genNorm * 2) * 0.002 * (1 + genNorm);
-      az += Math.cos(s * 1.3 + timeAccum * 2.7 + genNorm * 2) * 0.002 * (1 + genNorm);
-      ay += Math.sin(s * 0.7 + timeAccum * 3.5) * 0.001 * (1 + genNorm);
+      const chaos = 0.003 * vs * (1 + genNorm * 0.5);
+      ax += Math.sin(s + timeAccum * 5 + genNorm * 3) * chaos;
+      az += Math.cos(s * 1.3 + timeAccum * 4.5) * chaos;
+      ay += Math.sin(s * 0.7 + timeAccum * 6) * chaos * 0.5;
     }
 
-    // Axial jets: ejection above/below discs
-    if (inAxial) {
-      const jetStrength = vs * 0.004 * (1 + be * 0.5);
-      ay += Math.sign(y) * jetStrength;
-    }
-
-    // GAN pulse burst: abrupt outward push on all particles
-    if (pulseBurst > 0.001 && r < 0.3) {
-      const pushStr = pulseBurst * (1 - r / 0.3);
-      ax += x * pushStr * 5;
-      az += z * pushStr * 5;
-      ay += Math.sin(seeds[i] + timeAccum * 10) * pushStr * 2;
-    }
-
-    // GAN pulse snap: sudden inward rush after burst
-    if (pulseKick < -0.001) {
-      const pullStr = -pulseKick * 0.5 / (r + 0.01);
-      ax -= x * pullStr;
-      az -= z * pullStr;
-    }
-
-    // Damping
-    const drag = PHYS.PARTICLE_DRAG;
+    // Integrate
+    const drag = 0.98;
     vx = (vx + ax * dt) * drag;
     vy = (vy + ay * dt) * drag;
     vz = (vz + az * dt) * drag;
 
-    // Clamp velocity
     const speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
-    const maxSpeed = 0.05;
-    if (speed > maxSpeed) {
-      const s = maxSpeed / speed;
+    if (speed > 0.08) {
+      const s = 0.08 / speed;
       vx *= s; vy *= s; vz *= s;
     }
 
@@ -226,15 +196,12 @@ export function updateParticles(delta) {
 
   geometry.attributes.position.needsUpdate = true;
 
-  // Color and size by dominant energy zone
-  const avgZone =
-    genNorm * 0.5 + (state.pulseActive ? 0.3 : 0) + circNorm * 0.2;
-  const hue = 0.60 - avgZone * 0.2 - be * 0.03;
-  const colorSat = 0.2 + avgZone * 0.5;
-  const colorLit = 0.3 + avgZone * 0.5 + genNorm * 0.3;
-  material.color.setHSL(hue, colorSat, colorLit);
-  material.opacity = Math.min(1, 0.1 + vs * 0.5 + be * 0.1 + genNorm * 0.3);
-  material.size = 0.005 + avgZone * 0.01 + genNorm * 0.006;
+  // Color: colder (blue/violet) at outer edge, hotter (cyan/white) at core
+  const avgIntensity = Math.min(1, circNorm * 0.6 + genNorm * 0.3 + (pa ? 0.2 : 0));
+  const hue = 0.62 - avgIntensity * 0.14 - be * 0.02;
+  material.color.setHSL(hue, 0.3 + avgIntensity * 0.4, 0.3 + avgIntensity * 0.5);
+  material.opacity = Math.min(1, 0.15 + vs * 0.5 + be * 0.1 + genNorm * 0.2);
+  material.size = 0.006 + avgIntensity * 0.01 + genNorm * 0.004;
 }
 
 export function burstParticles(count) {
