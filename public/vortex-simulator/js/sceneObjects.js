@@ -3,7 +3,7 @@ import { PHYS } from './constants.js';
 import { state } from './physics.js';
 
 const group = new THREE.Group();
-let topDisc, bottomDisc, coil, coilGlow, steerIndicator, liftArrow, topArrow;
+let topDisc, bottomDisc, coil, coilGlow, steerIndicator, liftArrow, topArrow, core;
 let initialized = false;
 
 export function buildScene(scene) {
@@ -130,7 +130,7 @@ export function buildScene(scene) {
     blending: THREE.AdditiveBlending,
   });
   const coreGeo = new THREE.SphereGeometry(0.005, 16, 16);
-  const core = new THREE.Mesh(coreGeo, coreMat);
+  core = new THREE.Mesh(coreGeo, coreMat);
   core.position.y = 0;
   group.add(core);
 
@@ -220,5 +220,5 @@ export function updateScene(time) {
   // Vortex core pulse
   const vvs = state.vortexStability;
   core.material.opacity = 0.2 + vvs * 0.6;
-  core.scale.setScalar(0.5 + vs * 1.5 + Math.sin(time * 5) * vs * 0.2);
+  core.scale.setScalar(0.5 + vvs * 1.5 + Math.sin(time * 5) * vvs * 0.2);
 }

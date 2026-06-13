@@ -117,20 +117,22 @@ export function updateParticles(delta) {
     const safeR = Math.max(r, coreR);
     const theta = Math.atan2(z, x);
 
-    // Radial velocity: inward, accelerating near core (1/r sink flow)
-    const radialSpeed = vs * 0.8 / (safeR + 0.01);
+    // Radial velocity: inward, accelerating near core (convergent 1/r sink flow)
+    // Calibrated so particle takes ~1.5s from spawn radius to core
+    const radialSpeed = vs * 0.0009 / (safeR + 0.005);
 
-    // Angular velocity: differential rotation (Kepler-like: faster near center)
-    const angSpeed = vs * 0.015 * (1 / (safeR + 0.005) - 3);
+    // Angular velocity: differential rotation producing visible spiral (~5 revolutions in 1.5s)
+    const angSpeed = vs * 0.25 * (1 / (safeR + 0.005) - 3);
 
-    // Axial velocity: toward midplane, stronger far from center
+    // Axial velocity: toward midplane, matching radial timescale
     const axialDir = -Math.sign(y);
-    const axialSpeed = vs * 0.4 / (1 + Math.abs(y) * 3);
+    const axialSpeed = vs * 0.006 / (1 + Math.abs(y) * 3);
 
-    // Turbulence (pseudo-random but continuous)
-    const turbX = Math.sin(seeds[i] + timeAccum * 2.0 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.5) * 0.5) * 0.002;
-    const turbZ = Math.cos(seeds[i] + timeAccum * 2.3 + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * 0.002;
-    const turbY = Math.sin(seeds[i] + timeAccum * 1.7 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * 0.0015;
+    // Turbulence (pseudo-random but continuous, proportional to vortex strength)
+    const amp = vs * 0.002;
+    const turbX = Math.sin(seeds[i] + timeAccum * 2.0 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.5) * 0.5) * amp;
+    const turbZ = Math.cos(seeds[i] + timeAccum * 2.3 + Math.cos(seeds[i] * 0.1 + timeAccum * 0.7) * 0.5) * amp;
+    const turbY = Math.sin(seeds[i] + timeAccum * 1.7 + Math.sin(seeds[i] * 0.1 + timeAccum * 0.3) * 0.5) * amp * 0.75;
 
     // Apply radial inflow
     const nx = x + (radialSpeed * (-x / safeR)) * dt;
