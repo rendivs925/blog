@@ -29,16 +29,16 @@ export function buildPulse(scene) {
 let pulseGroup = null;
 let pulseStart = 0;
 
-export function triggerPulse() {
+export function triggerPulse(simTime) {
+  // Guard: never re-trigger while a pulse is in progress
+  if (state.pulseActive) return;
   if (!sceneRef) return;
 
   state.pulseActive = true;
   state.pulsePhase = 0;
-  pulseStart = performance.now();
+  pulseStart = simTime || 0;
 
-  // DCE pulse releases energy from vacuum: the sudden boundary change
-  // triggers the Ponderomotive collapse — vacuum pressure rushes in,
-  // doing work on the coil as Back EMF. This appears as a harvest spike.
+  // DCE pulse energy release
   state.pulseEnergyRelease = Math.min(200, state.P_harvest * 0.15 + 20);
 
   pulseGroup = new THREE.Group();
@@ -56,13 +56,12 @@ export function triggerPulse() {
   s1.position.y = 0.025;
   pulseGroup.add(s1);
 
-  // Counterpart (symmetric pair production)
   const s2 = new THREE.Mesh(sphereGeo.clone(), sphereMat.clone());
   s2.material.color.setHex(0xcc88ff);
   s2.position.y = -0.025;
   pulseGroup.add(s2);
 
-  // Equatorial shock ring — the vacuum ripple
+  // Equatorial shock ring — created once, scaled during animation
   const ringMat = new THREE.MeshBasicMaterial({
     color: 0x66ddcc,
     transparent: true,
@@ -72,13 +71,13 @@ export function triggerPulse() {
     blending: THREE.AdditiveBlending,
   });
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(0.002, 0.008, 48),
+    new THREE.RingGeometry(0.003, 0.01, 48),
     ringMat
   );
   ring.rotation.x = -Math.PI / 2;
   pulseGroup.add(ring);
 
-  // Center flash — the cavitation spark
+  // Center flash
   const flashMat = new THREE.MeshBasicMaterial({
     color: 0x88ddff,
     transparent: true,
@@ -92,7 +91,6 @@ export function triggerPulse() {
   flash.position.y = 0;
   pulseGroup.add(flash);
 
-  // Light burst
   const flashLight = new THREE.PointLight(0x66ccff, 0, 0.5);
   pulseGroup.add(flashLight);
 
@@ -100,10 +98,10 @@ export function triggerPulse() {
   burstParticles(300);
 }
 
-export function updatePulse() {
+export function updatePulse(simTime) {
   if (!state.pulseActive || !pulseGroup) return;
 
-  const elapsed = (performance.now() - pulseStart) / 700;
+  const elapsed = simTime !== undefined ? (simTime - pulseStart) / 0.7 : 0;
   state.pulsePhase = Math.min(elapsed, 1);
 
   if (elapsed >= 1) {
@@ -120,37 +118,34 @@ export function updatePulse() {
   const s = 1 + elapsed * 8;
   const op = 1 - elapsed;
 
-  // Expanding wavefront
+  // Spheres: scale up and fade
   pulseGroup.children[0].scale.set(s, s, s);
   pulseGroup.children[0].material.opacity = op * 0.35;
   pulseGroup.children[1].scale.set(s * 0.85, s * 0.85, s * 0.85);
   pulseGroup.children[1].material.opacity = op * 0.25;
 
-  // Shock ring
-  const ring = pulseGroup.children[2];
-  const ri = 0.002 + elapsed * 0.05;
-  const ro = ri + 0.006 + elapsed * 0.015;
-  ring.geometry.dispose();
-  ring.geometry = new THREE.RingGeometry(ri, ro, 48);
-  ring.material.opacity = op * 0.5 * (1 - Math.abs(elapsed - 0.25) * 2.5);
+  // Shock ring: scale uniformly to expand (no per-frame geometry)
+  const ringScale = 1 + elapsed * 6;
+  pulseGroup.children[2].scale.set(ringScale, ringScale, 1);
+  pulseGroup.children[2].material.opacity = op * 0.5 * (1 - Math.abs(elapsed - 0.25) * 2.5);
 
   // Flash
-  const flash = pulseGroup.children[3];
-  flash.scale.setScalar(1 + elapsed * 10);
-  flash.material.opacity = op * 0.8;
+  pulseGroup.children[3].scale.setScalar(1 + elapsed * 10);
+  pulseGroup.children[3].material.opacity = op * 0.8;
 
-  // Light intensity
+  // Light
   pulseGroup.children[4].intensity = op * 0.8;
 }
 
 export function checkAndTriggerPulse(time) {
   if (!state.vortexEstablished) return;
   if (state.coilLoad < 0.05) return;
+  if (state.pulseActive) return; // never stack pulses
 
   const intensity = state.dceIntensity;
   const threshold = PHYS.DCE_COUPLING + intensity * 0.12;
   if (Math.random() < threshold) {
-    triggerPulse();
+    triggerPulse(time);
   }
 }
 

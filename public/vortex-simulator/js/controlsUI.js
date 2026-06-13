@@ -10,6 +10,7 @@ const display = {
   'ctrl-magnet': v => `${(v / 100).toFixed(2)}x`,
   'ctrl-steerx': v => `${(v / 100).toFixed(2)}`,
   'ctrl-steery': v => `${(v / 100).toFixed(2)}`,
+  'ctrl-speed': v => `${(v / 100).toFixed(2)}x`,
 };
 
 export function setupControls(camera, controls) {
@@ -25,6 +26,7 @@ export function setupControls(camera, controls) {
       else if (id === 'ctrl-magnet') state.magnetStrength = v / 100;
       else if (id === 'ctrl-steerx') state.steerX = v / 100;
       else if (id === 'ctrl-steery') state.steerY = v / 100;
+      else if (id === 'ctrl-speed') state.timeScale = v / 100;
       if (disp) disp.textContent = fmt(v);
       compute();
       updateHUD();
@@ -81,6 +83,7 @@ function resetControls(camera, controls) {
   state.steerX = 0;
   state.steerY = 0;
   state.magnetStrength = 1.0;
+  state.timeScale = 1;
 
   const v = (id) => document.getElementById(id);
   v('ctrl-rpm').value = 5000;
@@ -89,12 +92,14 @@ function resetControls(camera, controls) {
   v('ctrl-magnet').value = 100;
   v('ctrl-steerx').value = 0;
   v('ctrl-steery').value = 0;
+  v('ctrl-speed').value = 100;
   v('val-rpm').textContent = '5,000';
   v('val-hv').textContent = '25 kV';
   v('val-load').textContent = '50%';
   v('val-magnet').textContent = '1.00x';
   v('val-steerx').textContent = '0.00';
   v('val-steery').textContent = '0.00';
+  v('val-speed').textContent = '1.00x';
 
   paused = false;
   v('btn-play').textContent = 'RUN';

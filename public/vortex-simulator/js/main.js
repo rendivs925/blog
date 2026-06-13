@@ -81,6 +81,7 @@ const statusEl = document.getElementById('status-text');
 statusEl.className = 'status-idle';
 
 const clock = new THREE.Clock();
+let simTime = 0;
 let pulseTimer = 0;
 let perfCounter = 0;
 
@@ -92,31 +93,35 @@ function animate() {
     return;
   }
 
-  const delta = Math.min(clock.getDelta(), 0.05);
-  const time = clock.elapsedTime;
+  const rawDelta = Math.min(clock.getDelta(), 0.05);
   perfCounter++;
 
   if (!isPaused()) {
-    compute();
-    updateScene(time);
-    updateVortex(time);
-    updateParticles(delta);
-    updatePulse();
+    const delta = rawDelta * state.timeScale;
+    if (delta > 0) {
+      simTime += delta;
 
-    if (perfCounter % 2 === 0) updateFields(time);
+      compute();
+      updateScene(simTime);
+      updateVortex(simTime);
+      updateParticles(delta);
+      updatePulse(simTime);
 
-    pulseTimer += delta;
-    if (pulseTimer > PHYS.DCE_PULSE_INTERVAL) {
-      checkAndTriggerPulse(time);
-      pulseTimer = 0;
+      if (perfCounter % 2 === 0) updateFields(simTime);
+
+      pulseTimer += delta;
+      if (pulseTimer > PHYS.DCE_PULSE_INTERVAL) {
+        checkAndTriggerPulse(simTime);
+        pulseTimer = 0;
+      }
+
+      updatePumpWave();
+      updateHUD();
+
+      const status = getStatus();
+      statusEl.textContent = status.text;
+      statusEl.className = status.cls;
     }
-
-    updatePumpWave();
-    updateHUD();
-
-    const status = getStatus();
-    statusEl.textContent = status.text;
-    statusEl.className = status.cls;
   }
 
   controls.update();

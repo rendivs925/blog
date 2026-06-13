@@ -27,6 +27,7 @@ export const state = {
   pulseActive: false,
   pulsePhase: 0,
   rpmSmooth: 5000,
+  timeScale: 1,
 
   vacuumDensityEff: 0,
   vortexCirculation: 0,

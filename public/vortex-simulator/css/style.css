@@ -183,6 +183,18 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 10px;
 }
 
+.controls-speed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.controls-speed input[type="range"] {
+  width: 80px;
+}
+
 .ctrl-btn {
   background: transparent;
   border: 1px solid rgba(100, 140, 200, 0.2);
