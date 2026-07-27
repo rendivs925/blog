@@ -111,7 +111,7 @@ The precision of the joints is such that the stones lock together in three dimen
 
 In West Java lies Gunung Padang, a multi-layered megalithic site that carbon dating suggests may contain layers dating to 25,000 to 14,000 BCE. If confirmed, this is a pre-Flood structure, built before the end of the last ice age. The site was built in multiple phases, each layer built on top of the previous, suggesting continuous occupation and construction across thousands of years.
 
-This is in your homeland. The ruins of a civilization that existed before recorded history, exactly as the Quran describes.
+The ruins of a civilization that existed before recorded history, exactly as the Quran describes.
 
 #### Nan Madol — Micronesia
 
