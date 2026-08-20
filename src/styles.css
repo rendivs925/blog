@@ -913,18 +913,26 @@ body {
   border-bottom: 1px solid var(--border-bright);
   background: linear-gradient(180deg, var(--surface-raised), var(--surface));
   border-radius: var(--radius);
-  text-align: right;
-  direction: rtl;
-  font-family: var(--font-arabic);
-  font-size: 1.25rem;
-  line-height: 2.1;
   padding: 1.4em 1.6em;
-  color: var(--text-highlight);
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .markdown-body blockquote.ayah p {
   margin: 0;
+}
+
+.markdown-body blockquote.ayah p[dir="rtl"] {
+  text-align: right;
+  direction: rtl;
+  font-family: var(--font-arabic);
+  font-size: 1.25rem;
+  line-height: 2.1;
+  color: var(--text-highlight);
+}
+
+.markdown-body blockquote.ayah p[dir="rtl"] + p,
+.markdown-body blockquote.ayah p:not([dir="rtl"]) {
+  margin-top: 0.9em;
 }
 
 .markdown-body hr {

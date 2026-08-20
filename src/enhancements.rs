@@ -41,12 +41,16 @@ setTimeout(() => {
   });
 
   document.querySelectorAll('.markdown-body blockquote').forEach((bq) => {
-    const text = bq.textContent || '';
-    if (/[\u0600-\u06FF]/.test(text) && !bq.classList.contains('ayah')) {
-      bq.classList.add('ayah');
-      bq.setAttribute('dir', 'rtl');
-      bq.setAttribute('lang', 'ar');
-    }
+    let hasArabic = false;
+    bq.querySelectorAll('p').forEach((p) => {
+      const text = p.textContent || '';
+      if (/[\u0600-\u06FF]/.test(text)) {
+        hasArabic = true;
+        p.setAttribute('dir', 'rtl');
+        p.setAttribute('lang', 'ar');
+      }
+    });
+    if (hasArabic) bq.classList.add('ayah');
   });
 
   if (window.katex) {

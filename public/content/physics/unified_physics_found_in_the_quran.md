@@ -11,9 +11,9 @@ tags: ["quran", "physics", "unified-field", "superfluid-vacuum", "gravity", "cos
 
 ## The Verse That Did Not Fit
 
-> وَهُوَ ٱلَّذِي خَلَقَ ٱلَّيْلَ وَٱلنَّهَارَ وَٱلشَّمْسَ وَٱلْقَمَرَۖ كُلٌّ فِي فَلَكٍ يَسْبَحُونَ
+> وَهُوَ ٱلَّذِي خَلَقَ ٱلَّيْلَ وَٱلنَّهَارَ وَٱلشَّمْسَ وَٱلْقَمَرَ ۖ كُلٌّ فِي فَلَكٍ يَسْبَحُونَ
 >
-> "And He is the One Who created the day and the night, the sun and the moon, each travelling in an orbit." (Quran 21:33)
+> "And it is He Who created the night and the day and the sun and the moon; all [heavenly bodies] in an orbit are swimming." (Quran 21:33)
 
 This verse has troubled observers for fourteen centuries. It describes the sun and the moon as swimming in an orbit, and for most of that time no one could explain the word. Physics assumed that space was empty, a void, a stage on which objects moved but which itself had no properties. Nothing swims through nothing. The verse was filed away as poetry.
 
@@ -23,9 +23,9 @@ The claim of this article is that the text was describing the real nature of the
 
 The Arabic verb is يسبحون, *yasbahoon*, from the root س-ب-ح. The primary sense of that root is to swim, to move through a fluid medium by propulsion against it. The same root gives the language its word for swimming, and the Quran uses it for creatures moving through water and for celestial bodies alike. In 21:33 and again in 36:40 the sun and the moon, and indeed all bodies, swim:
 
-> لَا ٱلشَّمْسُ يَنۢبَغِي لَهَآ أَن تُدْرِكَ ٱلْقَمَرَ وَلَا ٱلَّيْلُ سَابِقُ ٱلنَّهَارِۚ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ
+> لَا ٱلشَّمْسُ يَنۢبَغِي لَهَا أَن تُدْرِكَ ٱلْقَمَرَ وَلَا ٱلَّيْلُ سَابِقُ ٱلنَّهَارِ ۚ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ
 >
-> "It is not for the sun to catch up with the moon, nor does the night outrun the day. Each is travelling in an orbit of their own." (Quran 36:40)
+> "It is not allowable [i.e., possible] for the sun to reach the moon, nor does the night overtake the day, but each, in an orbit, is swimming." (Quran 36:40)
 
 The root is precise. A body that travels across empty void does not swim. The verb demands a medium, and the grammar extends the claim to all heavenly bodies, since the plural verb is applied to subjects that are grammatically only two. The text commits itself to a universe in which celestial bodies move within a substance.
 
@@ -85,9 +85,9 @@ In 1998 Riess and others measured the distances to distant supernovae and found 
 
 The fluid picture explains the acceleration as the medium's intrinsic tension. A stretched membrane naturally wants to expand, and a fluid under tension behaves the same way. The expansion of the universe is then a property of the medium itself, not an added ingredient. The Quran describes the heaven as built and expanding:
 
-> وَٱلسَّمَآءَ بَنَيْنَٰهَا بِأَيْيْدٍ وَإِنَّا لَمُوسِعُونَ
+> وَٱلسَّمَاءَ بَنَيْنَاهَا بِأَيْدٍ وَإِنَّا لَمُوسِعُونَ
 >
-> "We built the universe with great might, and We are certainly expanding it." (Quran 51:47)
+> "And the heaven We constructed with strength, and indeed, We are [its] expander." (Quran 51:47)
 
 The phrase is exact. The universe is not being pushed. The medium is breathing outward.
 
@@ -107,23 +107,19 @@ The fluid picture resolves both the singularity and the paradox. A black hole is
 
 Laboratory physics has already made the analogy concrete. Unruh's flowing fluid experiments and the atom cloud analogs recreate black hole horizons in the lab, and a rotating superfluid forms the same structure at a small scale. Penrose proved that singularities must exist under the classical assumptions, but the fluid picture does not need a singularity at all, only a current too strong to escape. A black hole is a drain in the ocean of space, and the ocean keeps its own.
 
-> **Interactive model.** The vortex-simulator below visualizes counter-rotating discs, a vortex dipole in the vacuum, and converging energy flow — the same whirlpool geometry the fluid picture ascribes to a black hole. Drag to orbit, and adjust RPM, high-voltage bias, and load to watch the circulation respond.
-
-{{< sim src="vortex-simulator/?embed" height="520" title="Vortex engine — interactive simulation" >}}
-
 ## Why Does Nothing Fit Together?
 
 Modern physics is a patchwork. It has separate forces, invisible substances, unexplained constants, and contradictory frames. The seams are everywhere, and the discipline has learned to live with them.
 
 The Quran proposes a test. In Surah Al-Mulk, verses three and four, it says that the creation of the Most Compassionate shows no imperfection, and it invites the reader to look again and again, returning the gaze until it is certain:
 
-> ٱلَّذِي خَلَقَ سَبۡعَ سَمَٰوَٰتٖ طِبَاقٗاۖ مَّا تَرَىٰ فِي خَلۡقِ ٱلرَّحۡمَٰنِ مِن تَفَٰوُتٖۖ فَٱرۡجِعِ ٱلۡبَصَرَ هَلۡ تَرَىٰ مِن فُطُورٖ
+> ٱلَّذِي خَلَقَ سَبْعَ سَمَاوَاتٍ طِبَاقًا ۖ مَّا تَرَىٰ فِي خَلْقِ ٱلرَّحْمَٰنِ مِن تَفَاوُتٍ ۖ فَارْجِعِ ٱلْبَصَرَ هَلْ تَرَىٰ مِن فُطُورٍ
 >
-> "He is the One Who created seven heavens, one above the other. You will never see any imperfection in the creation of the Most Compassionate. So look again: do you see any flaws?"
+> "[And] who created seven heavens in layers. You do not see in the creation of the Most Merciful any inconsistency. So return [your] vision [to the sky]; do you see any breaks?"
 >
-> ثُمَّ ٱرۡجِعِ ٱلۡبَصَرَ كَرَّتَيۡنِ يَنقَلِبۡ إِلَيۡكَ ٱلۡبَصَرُ خَاسِئٗا وَهُوَ حَسِيرٞ
+> ثُمَّ ارْجِعِ ٱلْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ ٱلْبَصَرُ خَاسِئًا وَهُوَ حَسِيرٌ
 >
-> "Then look again and again, your sight will return frustrated and weary." (Quran 67:3-4)
+> "Then return [your] vision twice again. [Your] vision will return to you humbled while it is fatigued." (Quran 67:3-4)
 
 The verse is a claim about the universe: there is no seam in creation.
 
