@@ -24,7 +24,6 @@ pub fn App() -> impl IntoView {
             <div class="app-shell">
                 <div class="ambient ambient-left"></div>
                 <div class="ambient ambient-right"></div>
-                <TopNav />
                 <Routes fallback=|| view! { <main class="home-shell"><p class="loading">"Page not found."</p></main> }>
                     <Route path=path!("") view=HomePage />
                     <Route path=path!("/category/:name") view=CategoryPage />
@@ -33,61 +32,6 @@ pub fn App() -> impl IntoView {
                 <SiteFooter />
             </div>
         </Router>
-    }
-}
-
-#[component]
-fn TopNav() -> impl IntoView {
-    let state = expect_context::<BlogState>();
-    let categories = state.categories();
-
-    view! {
-        <header class="topnav">
-            <div class="topnav-inner">
-                <A href=app_href("/") attr:class="brand" attr:aria-label="The Frontier Lab home">
-                    <span class="brand-word">"The Frontier Lab"</span>
-                </A>
-                <nav class="topnav-links" attr:aria-label="Primary">
-                    <A href=app_href("/") attr:class="topnav-link">"Articles"</A>
-                    <CategoryLinks
-                        categories=categories
-                        list_class="topnav-cats"
-                        item_class="topnav-cat-link"
-                        label=Some("Fields")
-                    />
-                </nav>
-                <a class="topnav-search" href="#search" attr:aria-label="Search">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </a>
-            </div>
-        </header>
-    }
-}
-
-/// A labelled list of category links, reused in the top nav and footer.
-#[component]
-fn CategoryLinks(
-    categories: Memo<Vec<String>>,
-    list_class: &'static str,
-    item_class: &'static str,
-    label: Option<&'static str>,
-) -> impl IntoView {
-    let list = move || {
-        categories
-            .get()
-            .into_iter()
-            .map(|category| {
-                let href = category_href(&category);
-                view! { <A href=href attr:class=item_class>{category}</A> }
-            })
-            .collect_view()
-    };
-
-    view! {
-        <div class=list_class>
-            {label.map(|l| view! { <span class="topnav-cat-label">{l}</span> })}
-            {list}
-        </div>
     }
 }
 
