@@ -4,11 +4,12 @@ use leptos_router::components::{A, Route, Router, Routes};
 use leptos_router::hooks::use_params_map;
 use leptos_router::path;
 
-use crate::content::{
-    BlogState, CategoryFilter, ContentRepository, PostCatalog, PostSummary, RenderedPost, Slug,
-};
+use crate::catalog::PostCatalog;
 use crate::enhancements::run_post_enhancements;
+use crate::model::{CategoryFilter, PostSummary, RenderedPost, Slug};
+use crate::repository::ContentRepository;
 use crate::routes::{app_href, category_href, post_href, ROUTER_BASE};
+use crate::state::BlogState;
 
 const PAGE_SIZE: usize = 12;
 
@@ -232,13 +233,10 @@ fn ListingPage(active_category: Signal<CategoryFilter>) -> impl IntoView {
     });
 
     Effect::new(move |_| {
-        let max_page = total_pages.get();
         let current = state.current_page.get();
-        if current > max_page {
-            state.current_page.set(max_page);
-        }
-        if current == 0 {
-            state.current_page.set(1);
+        let clamped = PostCatalog::clamp_page(current, total_pages.get());
+        if clamped != current {
+            state.current_page.set(clamped);
         }
     });
 
@@ -248,9 +246,6 @@ fn ListingPage(active_category: Signal<CategoryFilter>) -> impl IntoView {
         let page = state.current_page.get();
         let posts = state.posts.get();
         PostCatalog::page(&posts, &filter, &query, page, PAGE_SIZE)
-            .into_iter()
-            .cloned()
-            .collect::<Vec<_>>()
     });
 
     let can_go_previous = Memo::new(move |_| state.current_page.get() > 1);
@@ -260,7 +255,7 @@ fn ListingPage(active_category: Signal<CategoryFilter>) -> impl IntoView {
         let query = state.search_query.get();
         let filter = active_category.get();
         let posts = state.posts.get();
-        PostCatalog::featured(&posts, &filter, &query).cloned()
+        PostCatalog::featured(&posts, &filter, &query)
     });
     let show_featured = Memo::new(move |_| {
         active_category.get().is_all() && state.search_query.get().is_empty()
@@ -320,13 +315,11 @@ fn ListingPage(active_category: Signal<CategoryFilter>) -> impl IntoView {
                 when=move || !state.loading.get()
                 fallback=|| view! { <p class="loading">"Loading article index..."</p> }
             >
-                <Show when=move || show_featured.get()>
-                    <Show when=move || featured_post.get().is_some()>
-                        <section class="featured-section">
-                            <h2 class="section-label">"Latest"</h2>
-                            {move || featured_post.get().map(|post| view! { <PostCard post variant=CardVariant::Featured /> })}
-                        </section>
-                    </Show>
+                <Show when=move || show_featured.get() && featured_post.get().is_some()>
+                    <section class="featured-section">
+                        <h2 class="section-label">"Latest"</h2>
+                        {move || featured_post.get().map(|post| view! { <PostCard post variant=CardVariant::Featured /> })}
+                    </section>
                 </Show>
 
                 <section class="post-grid">

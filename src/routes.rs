@@ -48,3 +48,8 @@ pub fn content_root() -> String {
         "/public".to_string()
     }
 }
+
+/// The absolute URL for a content file relative to the content root.
+pub fn content_url(path: &str) -> String {
+    format!("{}/{}", content_root(), path)
+}

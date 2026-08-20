@@ -1,7 +1,7 @@
 use pulldown_cmark::{html, Options, Parser};
 use std::collections::HashMap;
 
-use crate::content::TocEntry;
+use crate::model::TocEntry;
 use crate::routes::content_root;
 
 /// Heading levels supported by the TOC.
@@ -271,18 +271,19 @@ impl PathResolver {
     /// Resolve a `src` for site-level embeds (simulations, wasm, video)
     /// against the content root.
     pub fn resolve_embed(&self, src: &str) -> String {
-        if is_relative_asset(src) {
-            format!("{}/{}", self.site_root, src)
-        } else {
-            src.to_string()
-        }
+        self.resolve(src, &self.site_root)
     }
 
     /// Resolve a relative asset (markdown image / link) against the
     /// article's directory.
     fn resolve_relative(&self, src: &str) -> String {
-        if is_relative_asset(src) {
-            format!("{}/{}", self.base_dir, src)
+        self.resolve(src, &self.base_dir)
+    }
+
+    /// Prefix `src` with `base` when it is a relative asset path.
+    fn resolve(&self, src: &str, base: &str) -> String {
+        if Self::is_relative_asset(src) {
+            format!("{base}/{src}")
         } else {
             src.to_string()
         }
@@ -295,43 +296,43 @@ impl PathResolver {
         }
         let mut out = html.to_string();
         for attr in ["src=\"", "src='", "href=\"", "href='"] {
-            out = rewrite_attr(&out, attr, self);
+            out = Self::rewrite_attr(&out, attr, self);
         }
         out
     }
-}
 
-fn is_relative_asset(value: &str) -> bool {
-    let Some(first) = value.chars().next() else {
-        return false;
-    };
-    if first == '/' || first == '#' || first == '?' {
-        return false;
+    /// True when `value` is a bare relative path needing a base prefix.
+    fn is_relative_asset(value: &str) -> bool {
+        let Some(first) = value.chars().next() else {
+            return false;
+        };
+        if first == '/' || first == '#' || first == '?' {
+            return false;
+        }
+        if value.contains("://") || value.starts_with("data:") {
+            return false;
+        }
+        if value.starts_with("mailto:") || value.starts_with("tel:") {
+            return false;
+        }
+        true
     }
-    if value.contains("://") || value.starts_with("data:") {
-        return false;
-    }
-    if value.starts_with("mailto:") || value.starts_with("tel:") {
-        return false;
-    }
-    true
-}
 
-fn rewrite_attr(html: &str, needle: &str, resolver: &PathResolver) -> String {
-    let mut result = String::with_capacity(html.len());
-    let mut rest = html;
-    while let Some(pos) = rest.find(needle) {
-        result.push_str(&rest[..pos + needle.len()]);
-        let after = &rest[pos + needle.len()..];
-        let end = after
-            .find(['"', '\'', '>'])
-            .unwrap_or(after.len());
-        let value = &after[..end];
-        result.push_str(&resolver.resolve_relative(value));
-        rest = &after[end..];
+    /// Rewrite every occurrence of `needle` in `html`, resolving the value.
+    fn rewrite_attr(html: &str, needle: &str, resolver: &PathResolver) -> String {
+        let mut result = String::with_capacity(html.len());
+        let mut rest = html;
+        while let Some(pos) = rest.find(needle) {
+            result.push_str(&rest[..pos + needle.len()]);
+            let after = &rest[pos + needle.len()..];
+            let end = after.find(['"', '\'', '>']).unwrap_or(after.len());
+            let value = &after[..end];
+            result.push_str(&resolver.resolve_relative(value));
+            rest = &after[end..];
+        }
+        result.push_str(rest);
+        result
     }
-    result.push_str(rest);
-    result
 }
 
 /// The full pipeline: frontmatter strip -> shortcodes -> markdown -> html,
@@ -348,15 +349,7 @@ impl ArticlePipeline {
         let engine = ShortcodeEngine::new();
         let expanded = engine.expand(&body, &resolver);
 
-        let mut options = Options::empty();
-        options.insert(Options::ENABLE_TABLES);
-        options.insert(Options::ENABLE_FOOTNOTES);
-        options.insert(Options::ENABLE_STRIKETHROUGH);
-        options.insert(Options::ENABLE_TASKLISTS);
-        options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
-        options.insert(Options::ENABLE_MATH);
-
-        let parser = Parser::new_ext(&expanded, options);
+        let parser = Parser::new_ext(&expanded, markdown_options());
         let mut html_out = String::new();
         html::push_html(&mut html_out, parser);
 
@@ -367,20 +360,28 @@ impl ArticlePipeline {
     }
 }
 
+/// The markdown parser options used for all articles.
+fn markdown_options() -> Options {
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_TABLES);
+    options.insert(Options::ENABLE_FOOTNOTES);
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_TASKLISTS);
+    options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
+    options.insert(Options::ENABLE_MATH);
+    options
+}
+
 /// Encapsulates front-matter parsing (--- ... --- block).
 struct Frontmatter;
 
 impl Frontmatter {
     /// Strip the front-matter block, returning only the article body.
     fn strip(content: &str) -> &str {
-        if !content.starts_with("---\n") {
-            return content;
-        }
-
-        let mut parts = content.splitn(3, "---\n");
-        let _ = parts.next();
-        let _ = parts.next();
-        parts.next().unwrap_or_default()
+        content
+            .splitn(3, "---\n")
+            .nth(2)
+            .unwrap_or(content)
     }
 
     /// Directory the article lives in (relative to the content root).
