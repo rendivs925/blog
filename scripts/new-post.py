@@ -55,9 +55,23 @@ excerpt: \"{args.excerpt}\"
 tags: [{tags_line}]
 ---
 
-# {args.title}
+## Introduction
 
-Write your article here.
+Write your article here. Use `##` for section headings; the page hero shows the title.
+
+## Embeds
+
+Embed simulations, WebAssembly apps, video, figures, and YouTube:
+
+```text
+{{{{< sim src="vortex-simulator/?embed" height="560" title="Vortex simulation" >}}}}
+{{{{< wasm src="simulations/plasma-crystal/" height="600" title="Plasma crystal" >}}}}
+{{{{< video src="assets/demo.mp4" title="Demo video" >}}}}
+{{{{< figure src="assets/diagram.png" caption="Schematic diagram" >}}}}
+{{{{< youtube id="dQw4w9WgXcQ" title="Reference" >}}}}
+```
+
+See EMBEDS.md for the full reference.
 """
 
     target_file.write_text(content, encoding="utf-8")

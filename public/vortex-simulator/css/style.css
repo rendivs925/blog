@@ -280,3 +280,46 @@ input[type="range"]::-moz-range-thumb {
     font-size: 9px;
   }
 }
+
+/* Embed mode (?embed) — compact inside an article iframe */
+html.embed {
+  background: #050508;
+}
+
+html.embed #scene-container {
+  position: absolute;
+}
+
+html.embed #hud {
+  top: 10px;
+  right: 10px;
+  min-width: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+}
+
+html.embed #controls-panel {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 0;
+  width: auto;
+  max-width: calc(100% - 20px);
+  padding: 8px 14px;
+}
+
+html.embed .controls-cols {
+  gap: 14px;
+}
+
+html.embed input[type="range"] {
+  width: 70px;
+}
+
+html.embed .hud-row.hud-tiny {
+  display: none;
+}
+
+html.embed .hud-sep {
+  margin: 3px 0;
+}

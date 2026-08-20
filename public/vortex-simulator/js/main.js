@@ -15,6 +15,10 @@ import { buildPulse, updatePumpWave, updateGAN } from './dcePulse.js';
 import { updateHUD } from './hud.js';
 import { setupControls, isPaused } from './controlsUI.js';
 
+if (new URLSearchParams(window.location.search).has('embed')) {
+  document.documentElement.classList.add('embed');
+}
+
 const container = document.getElementById('scene-container');
 const w = container.clientWidth;
 const h = container.clientHeight;

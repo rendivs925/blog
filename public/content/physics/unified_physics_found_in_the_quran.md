@@ -9,12 +9,6 @@ excerpt: "The Quran said the sun and moon swim in an orbit. Modern physics is no
 tags: ["quran", "physics", "unified-field", "superfluid-vacuum", "gravity", "cosmology"]
 ---
 
-# Unified Physics Found in the Quran
-
-## The One-Fluid Universe
-
----
-
 ## The Verse That Did Not Fit
 
 > وَهُوَ ٱلَّذِي خَلَقَ ٱلَّيْلَ وَٱلنَّهَارَ وَٱلشَّمْسَ وَٱلْقَمَرَۖ كُلٌّ فِي فَلَكٍ يَسْبَحُونَ
@@ -112,6 +106,10 @@ Black holes have been treated as singularities, points where physics itself brea
 The fluid picture resolves both the singularity and the paradox. A black hole is a vortex, a whirlpool in the medium whose current exceeds the speed of light. Nothing falls into a hole in nothing. Matter is caught in a current it cannot swim against, and it is carried, reorganized, and ultimately returned through radiation, the way water that falls into a drain returns as weather.
 
 Laboratory physics has already made the analogy concrete. Unruh's flowing fluid experiments and the atom cloud analogs recreate black hole horizons in the lab, and a rotating superfluid forms the same structure at a small scale. Penrose proved that singularities must exist under the classical assumptions, but the fluid picture does not need a singularity at all, only a current too strong to escape. A black hole is a drain in the ocean of space, and the ocean keeps its own.
+
+> **Interactive model.** The vortex-simulator below visualizes counter-rotating discs, a vortex dipole in the vacuum, and converging energy flow — the same whirlpool geometry the fluid picture ascribes to a black hole. Drag to orbit, and adjust RPM, high-voltage bias, and load to watch the circulation respond.
+
+{{< sim src="vortex-simulator/?embed" height="520" title="Vortex engine — interactive simulation" >}}
 
 ## Why Does Nothing Fit Together?
 

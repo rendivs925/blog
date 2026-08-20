@@ -17,7 +17,9 @@ The project is designed for long-term maintainability:
 - Full-text style filtering over title, excerpt, category, and tags
 - Pagination optimized for large article sets (`12` per page)
 - Runtime article cache to avoid repeated markdown parsing
-- MathJax support for technical writing
+- KaTeX rendering for technical writing (native `pulldown-cmark` math)
+- Rich embeds: simulations, WebAssembly/Bevy apps, video, figures, YouTube
+- Auto-generated table of contents, previous/next, and related posts
 
 ## Project Structure
 
@@ -30,16 +32,38 @@ blog/
 │   │   ├── rust/
 │   │   ├── physics/
 │   │   └── general/
+│   ├── simulations/            # Self-contained WASM/Bevy apps (optional)
 │   └── content-index.json      # Auto-generated metadata index
 ├── scripts/
 │   └── new-post.py             # Article scaffold generator
 ├── src/
-│   ├── app.rs                  # Routing, listing, post rendering
+│   ├── app.rs                  # Routing + components (thin view layer)
+│   ├── content.rs              # Domain model, catalog queries, repository
+│   ├── markdown.rs             # Article pipeline, shortcodes, TOC, assets
+│   ├── routes.rs               # Router base + content-root helpers
 │   ├── lib.rs
 │   ├── main.rs
 │   └── styles.css
+├── EMBEDS.md                   # Authoring reference for rich embeds
 └── Trunk.toml
 ```
+
+## Architecture
+
+The codebase is split into cohesive layers:
+
+- **`routes.rs`** — router base URL and content-root resolution.
+- **`content.rs`** — typed domain model (`Slug`, `CategoryFilter`, `PostSummary`,
+  `RenderedPost`), a pure `PostCatalog` for filtering/pagination/related queries,
+  reactive `BlogState`, and the network `ContentRepository`.
+- **`markdown.rs`** — the `ArticlePipeline` (front-matter → shortcodes → markdown →
+  HTML), a `ShortcodeEngine` (Strategy pattern over typed embed renderers), heading
+  processing (TOC + id injection), and asset-path resolution.
+- **`app.rs`** — Leptos components only; it consumes the domain layer and holds no
+  business logic.
+
+The domain logic in `content.rs` and the pipeline in `markdown.rs` are covered by
+unit tests (`cargo test`).
 
 ## Prerequisites
 
