@@ -45,7 +45,6 @@ fn TopNav() -> impl IntoView {
         <header class="topnav">
             <div class="topnav-inner">
                 <A href=app_href("/") attr:class="brand" attr:aria-label="The Frontier Lab home">
-                    <span class="brand-mark">"◈"</span>
                     <span class="brand-word">"The Frontier Lab"</span>
                 </A>
                 <nav class="topnav-links" attr:aria-label="Primary">
@@ -102,7 +101,6 @@ fn SiteFooter() -> impl IntoView {
             <div class="footer-inner">
                 <div class="footer-col footer-mission">
                     <div class="brand footer-brand">
-                        <span class="brand-mark">"◈"</span>
                         <span class="brand-word">"The Frontier Lab"</span>
                     </div>
                     <p>
@@ -240,17 +238,6 @@ fn ListingPage(active_category: Signal<CategoryFilter>) -> impl IntoView {
         }
     });
 
-    let paginated_posts = Memo::new(move |_| {
-        let query = state.search_query.get();
-        let filter = active_category.get();
-        let page = state.current_page.get();
-        let posts = state.posts.get();
-        PostCatalog::page(&posts, &filter, &query, page, PAGE_SIZE)
-    });
-
-    let can_go_previous = Memo::new(move |_| state.current_page.get() > 1);
-    let can_go_next = Memo::new(move |_| state.current_page.get() < total_pages.get());
-
     let featured_post = Memo::new(move |_| {
         let query = state.search_query.get();
         let filter = active_category.get();
@@ -260,6 +247,27 @@ fn ListingPage(active_category: Signal<CategoryFilter>) -> impl IntoView {
     let show_featured = Memo::new(move |_| {
         active_category.get().is_all() && state.search_query.get().is_empty()
     });
+
+    let paginated_posts = Memo::new(move |_| {
+        let query = state.search_query.get();
+        let filter = active_category.get();
+        let page = state.current_page.get();
+        let posts = state.posts.get();
+        // The featured card already shows the newest post on the landing
+        // view, so exclude it from the grid to avoid a duplicate entry.
+        let exclude = if show_featured.get() {
+            featured_post.get().map(|p| p.slug)
+        } else {
+            None
+        };
+        PostCatalog::page(&posts, &filter, &query, page, PAGE_SIZE)
+            .into_iter()
+            .filter(|post| exclude.as_ref() != Some(&post.slug))
+            .collect::<Vec<_>>()
+    });
+
+    let can_go_previous = Memo::new(move |_| state.current_page.get() > 1);
+    let can_go_next = Memo::new(move |_| state.current_page.get() < total_pages.get());
 
     view! {
         <main class="home-shell">

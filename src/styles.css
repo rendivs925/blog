@@ -133,11 +133,6 @@ body {
   white-space: nowrap;
 }
 
-.brand-mark {
-  color: var(--text-dim);
-  font-size: 1.1rem;
-}
-
 .brand-word {
   font-size: 1rem;
 }
